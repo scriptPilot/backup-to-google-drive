@@ -15,6 +15,9 @@
   # Start session
   session_start();
 
+  # Encoding
+  header('Content-Type: text/html; charset=utf-8');
+
   # Determine this file URL
   define('FILE_URL', 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']);
 
@@ -198,8 +201,60 @@
   }
 
   # Google request wrapper
-  $googleRequest = new Curl\Curl();
-  $googleRequest->setHeader('Authorization', 'Bearer ' . $_SESSION['googleToken']);
+  function googleRequest($url, $data = [], $method = 'GET') {
+    $request = new Curl\Curl();
+    $request->setHeader('Authorization', 'Bearer ' . $_SESSION['googleToken']);
+    if ($method === 'POST') $request->post($url, $data);
+      else $request->get($url, $data);
+    if ($googleRequest->error) {
+      $code = $request->response->error->code || $request->errorCode;
+      $message = $request->response->error->message || $request->errorMessage;
+      echo '<p>Error: ' . $code . ' - ' . $message . '</p>';
+      $request->close();
+      exit;
+    } else {
+      $json = json_encode($request->response);
+      $array = json_decode($json, true);
+      $request->close();
+      return $array;
+    }
+  }
+  function googlePostJson($url, $data) {
+    $request = new Curl\Curl();
+    $request->setHeader('Authorization', 'Bearer ' . $_SESSION['googleToken']);
+    $request->setHeader('Content-Type', 'application/json');
+    $request->post($url, $data);
+    if ($googleRequest->error) {
+      $code = $request->response->error->code || $request->errorCode;
+      $message = $request->response->error->message || $request->errorMessage;
+      echo '<p>Error: ' . $code . ' - ' . $message . '</p>';
+      $request->close();
+      exit;
+    } else {
+      $json = json_encode($request->response);
+      $array = json_decode($json, true);
+      $request->close();
+      return $array;
+    }
+  }
+  function googlePatch($url, $data) {
+    $request = new Curl\Curl();
+    $request->setHeader('Authorization', 'Bearer ' . $_SESSION['googleToken']);
+    $request->setHeader('Content-Type', 'application/json');
+    $request->patch($url, $data);
+    if ($googleRequest->error) {
+      $code = $request->response->error->code || $request->errorCode;
+      $message = $request->response->error->message || $request->errorMessage;
+      echo '<p>Error: ' . $code . ' - ' . $message . '</p>';
+      $request->close();
+      exit;
+    } else {
+      $json = json_encode($request->response);
+      $array = json_decode($json, true);
+      $request->close();
+      return $array;
+    }
+  }
 
   # GitHub request wrapper
   $githubRequest = new Curl\Curl();
@@ -209,15 +264,11 @@
   if ($_SESSION['googleToken']) {
 
     # Show user information
-    $googleRequest->get('https://people.googleapis.com/v1/people/me', ['personFields' => 'emailAddresses,photos']);
-    if ($googleRequest->response->error) {
-      echo '<p>Error: ' . $googleRequest->response->error->code . ' - ' . $googleRequest->response->error->message . '</p>';
-    } else {
-      echo '<h3>Google</h3>'
-         . '<p><b>' . $googleRequest->response->emailAddresses[0]->value . '</b></p>'
-         . '<p><img src="' . $googleRequest->response->photos[0]->url . '" width="80" /></p>'
-         . '<p><a href="' . FILE_URL . '?action=googleSignOut">Google Sign-Out</a></p>';
-    }
+    $info = googleRequest('https://people.googleapis.com/v1/people/me', ['personFields' => 'emailAddresses,photos']);
+    echo '<h3>Google</h3>'
+       . '<p><b>' . $info['emailAddresses'][0]['value'] . '</b></p>'
+       . '<p><img src="' . $info['photos'][0]['url'] . '" width="80" /></p>'
+       . '<p><a href="' . FILE_URL . '?action=googleSignOut">Google Sign-Out</a></p>';
 
   }
 
@@ -255,6 +306,161 @@
   # Sync links
   if ($_SESSION['googleToken']) {
     echo '<h2>Synchronization</h2>';
+    echo '<p><a href="' . FILE_URL . '?sync=photoAlbums">Synchronize Photo Albums</a></p>';
+  }
+
+  # Sync actions
+  if ($_GET['sync']) {
+    echo '<h3>Result</h3>';
+  }
+  if ($_GET['sync'] === 'photoAlbums') {
+    # Start array with relevant Picasa albums
+    $picasaAlbums = [];
+    # Loop all Picasa albums
+    $allAlbums = googleRequest('https://picasaweb.google.com/data/feed/api/user/default');
+    foreach ($allAlbums['entry'] as $album) {
+      # Extract album id
+      preg_match('/\/([0-9]+)$/', $album['id'], $id);
+      $albumId = $id[1];
+      # Proceed only with real albums, exlude "Auto Backup", "Profile Photos", "Hangout:..." and "YYYY-MM-DD" albums
+      if ($album['title'] !== 'Profile Photos' && $album['title'] !== 'Auto Backup' && substr($album['title'], 0, 8) !== 'Hangout:' && preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $album['title']) === 0) {
+        # Request all files in album
+        $allAlbumFiles = googleRequest('https://picasaweb.google.com/data/feed/api/user/default/albumid/' . $albumId);
+        # Workaround if only one photo is in the album and props are on first level
+        if ($allAlbumFiles['entry']['id']) {
+          $tmp = $allAlbumFiles['entry'];
+          $allAlbumFiles['entry'] = [$tmp];
+        }
+        # Create array of Picasa files
+        $picasaFiles = [];
+        # Loop Picasa files
+        foreach ($allAlbumFiles['entry'] as $file) {
+          # Extract photo id
+          preg_match('/\/([0-9]+)$/', $file['id'], $id);
+          $fileId = $id[1];
+          # Check file type
+          $action = preg_match('/\.(jpeg|jpg|png|gif)$/i', $file['title']) ? 'sync' : 'skip';
+          # Add file to array
+          $picasaFiles[] = [
+            'id' => $fileId,
+            'name' => $file['title'],
+            'link' => $file['content']['@attributes']['src'],
+            'action' => $action
+          ];
+        }
+        # Add album to array
+        $picasaAlbums[] = [
+          'id' => $albumId,
+          'name' => $album['title'],
+          'action' => 'sync',
+          'files' => $picasaFiles
+        ];
+      } else {
+        # Add album to array
+        $picasaAlbums[] = [ 'id' => $albumId, 'name' => $album['title'], 'action' => 'skip' ];
+      }
+    }
+
+    # Define folder for photo albums
+    $driveFolder = 'Google Fotoalben';
+    $driveFolderId = null;
+    # Search for existing folder
+    $search = googleRequest('https://www.googleapis.com/drive/v3/files', ['q' => 'name="' . $driveFolder . '" and trashed=false']);
+    if (count($search['files']) === 1) {
+      $driveFolderId = $search['files'][0]['id'];
+    # Create new folder
+    } else if (count($search['files']) === 0) {
+      $create = googlePostJson('https://www.googleapis.com/drive/v3/files', [ 'name' => $driveFolder, 'mimeType' => 'application/vnd.google-apps.folder' ]);
+      $driveFolderId = $create['id'];
+    # Folder not clear
+    } else {
+      echo '<p>Error: Folder "' . $driveFolder . '" found multiple times in Google Drive.</p>';
+      exit;
+    }
+    # Search sub folders
+    $googleDriveAlbums = [];
+    $search = googleRequest('https://www.googleapis.com/drive/v3/files', ['q' => '"' . $driveFolderId . '" in parents and trashed=false']);
+    foreach ($search['files'] as $file) {
+      # Create folder object
+      $folder = [
+        'id' => $file['id'],
+        'name' => $file['name'],
+        'action' => $file['mimeType'] === 'application/vnd.google-apps.folder' ? 'sync' : 'delete'
+      ];
+      # Loop files in folders
+      if ($file['mimeType'] === 'application/vnd.google-apps.folder') {
+        $files = [];
+        $subSearch = googleRequest('https://www.googleapis.com/drive/v3/files', ['q' => '"' . $file['id'] . '" in parents and trashed=false']);
+        foreach ($subSearch['files'] as $subFile) {
+          if ($subFile['mimeType'] !== 'application/vnd.google-apps.folder') {
+            $files[] = ['id' => $subFile['id'], 'name' => $subFile['name']];
+          }
+        }
+        $folder['files'] = $files;
+      }
+      # Add to array
+      $googleDriveAlbums[] = $folder;
+    }
+    # Create missing folders
+    foreach ($picasaAlbums as $from) {
+      if ($from['action'] === 'sync') {
+        $found = false;
+        foreach ($googleDriveAlbums as $to) {
+          if ($to['name'] === $from['name']) $found = true;
+        }
+        if (!$found) {
+          $new = $from;
+          $new['action'] = 'create';
+          $googleDriveAlbums[] = $new;
+        }
+      }
+    }
+    # Delete addition folder and files
+    foreach ($googleDriveAlbums as $key => $to) {
+      if ($to['action'] !== 'create') {
+        $found = false;
+        foreach ($picasaAlbums as $from) {
+          if ($from['name'] === $to['name']) $found = true;
+        }
+        if (!$found) {
+          $googleDriveAlbums[$key]['action'] = 'delete';
+        }
+      }
+    }
+    # Apply changes
+    foreach ($googleDriveAlbums as $key => $album) {
+      if ($album['action'] === 'create') {
+        $create = googlePostJson('https://www.googleapis.com/drive/v3/files', [ 'name' => $album['name'], 'mimeType' => 'application/vnd.google-apps.folder', 'parents' => [$driveFolderId] ]);
+        $googleDriveAlbums[$key]['id'] = $create['id'];
+        $album['id'] = $create['id'];
+      } else if ($album['action'] === 'delete') {
+        $delete = googlePatch('https://www.googleapis.com/drive/v3/files/' . $album['id'], ['trashed' => true]);
+      }
+      foreach ($album['files'] as $file) {
+        # Download
+        $request = new Curl\Curl();
+        $request->setHeader('Authorization', 'Bearer ' . $_SESSION['googleToken']);
+        $request->download($file['link'] . '?imgmax=9999', 'tmp.jpg');
+        # Upload
+        $client = new Google_Client();
+        $client->setDeveloperKey(GOOGLE_API_KEY);
+        $client->setAuthConfig(GOOGLE_CREDENTIALS_FILE);
+        $client->setAccessToken($_SESSION['googleToken']);
+        $driveService = new Google_Service_Drive($client);
+        $fileMetadata = new Google_Service_Drive_DriveFile([
+          'name' => $file['name'],
+          'parents' => [$album['id']]
+        ]);
+        $content = file_get_contents('tmp.jpg');
+        $file = $driveService->files->create($fileMetadata, [
+          'data' => $content,
+          'mimeType' => 'image/jpeg',
+          'uploadType' => 'multipart',
+          'fields' => 'id'
+        ]);
+      }
+    }
+    echo '<pre>'; print_r([$picasaAlbums, $googleDriveAlbums]); echo '</pre>';
   }
 
 ?>
