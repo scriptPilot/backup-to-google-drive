@@ -35,7 +35,7 @@
      . '</form>';
 
   /**
-   * Do sync
+   * Do contacts sync
    */
 
   // Check destination folder input
@@ -55,20 +55,30 @@
 
     // Get Google Drive folder id
     $folderId = getGoogleDriveFolderId($destinationFolder, true);
-    show($folderId);
 
-
-    /*
+    // Create vCards in Google drive (works only for meta data currently)
     foreach ($contacts['connections'] as $contact) {
       $vCard = convertGoogleContactToVCard($contact);
-      echo $vCard . '<hr />';
+      $fileName = $contact['names'][0]['displayName'] . '.vcf';
+      $params = [
+        'uploadType' => 'multipart',
+        'fields' => 'id'
+      ];
+      $body = [
+        'mimeType' => 'text/x-vCard',
+        'name' => $fileName,
+        'parents' => [$folderId],
+        'data' => $vCard
+      ];
+      $createdFile = performGoogleRequest('https://www.googleapis.com/drive/v3/files', $params, 'POST', $body);
+      echo $contact['names'][0]['displayName'] . '.vcf created<br />';
     }
-    */
 
     // Show run time
     $endTime = time();
     $duration = $endTime - $startTime;
-    echo '<span style="color: grey">Run: ' . date('H:i:s') . ' / ' . $duration . ' second' . ($duration !== 1 ? 's' : '') . '</span>';
+    echo '<br />'
+       . '<span style="color: grey">Run: ' . date('H:i:s') . ' / ' . $duration . ' second' . ($duration !== 1 ? 's' : '') . '</span>';
 
   }
 
