@@ -35,8 +35,22 @@
     // Error result
     if ($curl->error) {
 
+      // Log error
+      echo '<pre>';
+      echo '<b>Error</b><br />';
+      echo $curl->errorCode . ': ' . $curl->errorMessage . '<br />';
+      echo '<b>URL</b><br />';
+      print_r($url); echo '<br />';
+      echo '<b>Parameters</b><br />';
+      print_r($params);
+      echo '<b>Method</b><br />';
+      print_r($method); echo '<br />';
+      echo '<b>Payload</b><br />';
+      print_r($payload); echo '<br />';
+      echo '</pre>';
+      die();
+
       // Return false
-      show($curl->errorCode, $curl->errorMessage, $curl->response);
       return false;
 
     } else {
