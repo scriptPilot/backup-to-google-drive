@@ -8,4 +8,5 @@ $baseDir = dirname($vendorDir);
 return array(
     'Google_Service_' => array($vendorDir . '/google/apiclient-services/src'),
     'Google_' => array($vendorDir . '/google/apiclient/src'),
+    'Behat\\Transliterator' => array($vendorDir . '/behat/transliterator/src'),
 );
