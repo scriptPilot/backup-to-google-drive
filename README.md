@@ -4,10 +4,11 @@
 
 ## Scope
 
-* [x] Google Contacts
+* [x] Google Contacts (with contact photos)
 * [ ] Google Calendars
 * [ ] Google Photos - Albums
 * [ ] Remember The Milk
+* [ ] GitHub Repositories (with issues)
 
 ## Setup
 
