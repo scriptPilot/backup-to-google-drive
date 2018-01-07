@@ -8,7 +8,7 @@
    * Requires: performGoogleRequest() function
    */
 
-  function createGoogleDriveFolder($name, $parent = 'root') {
+  function createGoogleDriveFolder($name, $parent = 'root', $description = '') {
 
     $params = [
       'uploadType' => 'multipart',
@@ -17,6 +17,7 @@
     $body = [
       'mimeType' => 'application/vnd.google-apps.folder',
       'name' => $name,
+      'description' => $description,
       'parents' => [$parent]
     ];
     $createdFolder = performGoogleRequest('https://www.googleapis.com/drive/v3/files', $params, 'POST', $body);

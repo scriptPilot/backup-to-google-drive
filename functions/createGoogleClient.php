@@ -5,7 +5,7 @@
    * Parameters:
    * - <null/string/array> $scope
    * - <null/boolean> $login
-   * Output: Google client or false
+   * Output: Google client or die
    * Prerequisites:
    * - Installed "google/apiclient: ^2.0" with Composer
    * - Loaded constants
@@ -118,8 +118,14 @@
         // Error provided by URL
         } else if (isset($_GET['error'])) {
 
-          // Return false
-          return false;
+          // Show error message
+          echo '<pre>';
+          echo '<b>Error</b><br />';
+          echo $_GET['error'];
+          echo '</pre>';
+
+          // Exit
+          die();
 
         // No code or error provided by URL
         } else {

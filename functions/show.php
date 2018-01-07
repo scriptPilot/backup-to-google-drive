@@ -6,8 +6,9 @@
    */
 
   function show() {
+    $args = func_get_args();
     echo '<pre>';
-    var_dump(func_get_args());
+    print_r(count($args) === 1 ? $args[0] : $args);
     echo '</pre>';
   }
 

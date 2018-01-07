@@ -18,3 +18,7 @@
 3. Run php composer install
 4. Upload files to server
 5. Open index.php on server
+
+## Notes
+
+- To force updates, change the ident definition
