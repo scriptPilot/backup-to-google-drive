@@ -9,6 +9,7 @@
 * [ ] Google Photos Albums
 * [ ] Remember The Milk (with completed tasks)
 * [ ] GitHub Repositories (with issues)
+* [ ] Firebase databases and users
 
 ## Setup
 
