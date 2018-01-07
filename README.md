@@ -6,7 +6,7 @@
 
 * [x] Google Contacts (with contact photos)
 * [ ] Google Calendars
-* [ ] Google Photos - Albums
+* [ ] Google Photos Albums
 * [ ] Remember The Milk (with completed tasks)
 * [ ] GitHub Repositories (with issues)
 
