@@ -4,10 +4,10 @@
 
 ## Scope
 
-[x] Google Contacts
-[ ] Google Calendars
-[ ] Google Photos - Albums
-[ ] Remember The Milk
+* [x] Google Contacts
+* [ ] Google Calendars
+* [ ] Google Photos - Albums
+* [ ] Remember The Milk
 
 ## Setup
 
