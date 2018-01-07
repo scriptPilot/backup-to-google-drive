@@ -117,7 +117,7 @@
       if (!in_array($file['ident'], $contactsIdents)) {
         $trashed = trashGoogleDriveFile($file['id']);
         if ($trashed) echo '<span style="color: orange">' . $file['name'] . ' trashed</span><br />';
-        else echo '<span color="red">Failed to trash ' . $file['name'] . '</span><br />';
+        else echo '<span style="color: red">Failed to trash ' . $file['name'] . '</span><br />';
       }
     }
 
