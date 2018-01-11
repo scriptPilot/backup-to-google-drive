@@ -55,11 +55,14 @@
 
     } else {
       
+      // Copy response
+      $response = $curl->response;
+      
       // Close cURL request
       $curl->close();
 
       // Return response as an array
-      return json_decode(json_encode($curl->response), true);
+      return json_decode(json_encode($response), true);
 
     }
 
