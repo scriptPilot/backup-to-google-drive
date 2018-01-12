@@ -6,7 +6,7 @@
 // Require class file
 require('Auth.php');
 
-// Create class instance
+// Create authentication object
 $auth = new \Google\Auth('your-client-id', 'your-client-secret', 'your-redirect-uri');
 
 // Add scope
@@ -34,6 +34,50 @@ addScope('https://www.googleapis.com/auth/drive');
 // or
 addScope('https://www.googleapis.com/auth/contacts https://www.googleapis.com/auth/drive');
 ```
+
+### setCredentials(*array* $credentials)
+
+Set credentials to the authentication object.
+
+#### Example
+
+```php
+setCredentials([
+  'access_token' => '1/fFAGRNJru1FTz70BzhT3Zg',
+  'expires_in' => '3920',
+  'token_type' => 'Bearer',
+  'refresh_token' => '1/xEoDL4iW3cxlI7yDbSRFYNG01kVKM2C-259HOF2aQbI'
+]);
+```
+
+### getCredentials()
+
+Return *array* credentials or *null*.
+
+#### Example
+
+```php
+getCredentials();
+// Return
+[
+  'access_token' => '1/fFAGRNJru1FTz70BzhT3Zg',
+  'expires_in' => '3920',
+  'token_type' => 'Bearer',
+  'refresh_token' => '1/xEoDL4iW3cxlI7yDbSRFYNG01kVKM2C-259HOF2aQbI'
+];
+```
+
+### getToken()
+
+Return *string* token or *null*. You should use this function to decide whether the user is signed-in or not.
+
+### signIn()
+
+Forward to Google sign-in page and handle the further process. At the end, the authentication objects should have new credentials. They are stored in the session with `$_SESSION['GOOGLE_CREDENTIALS']` as well.
+
+### signOut()
+
+Remove credentials from authentication object and session.
 
 ## Example
 
@@ -65,7 +109,7 @@ As a prerequisite, you have to create a project in https://console.developers.go
   require('lib/Google/Auth.php');
 
   /**
-   * Create class instance
+   * Create authentication object
    */
 
   $auth = new \Google\Auth(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
