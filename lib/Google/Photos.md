@@ -10,7 +10,7 @@ require('Photos.php');
 $photos = new \Google\Photos('valid-google-oauth2-token');
 
 // Call method
-$albums = $drive->getAlbums();
+$albums = $photos->getAlbums();
 foreach ($albums as $album) echo $album['name'] . '<br />';
 ```
 
@@ -84,7 +84,7 @@ As a prerequisite, you have to create a project in https://console.developers.go
      * List albums from Google Photos
      */
 
-    $albums = $drive->getAlbums();
+    $albums = $photos->getAlbums();
     foreach ($albums as $album) echo $album['name'] . '<br />';
 
   }
