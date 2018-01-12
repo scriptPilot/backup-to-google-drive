@@ -19,7 +19,7 @@ else echo 'Token: ' . $auth->getToken;
 
 ## Methods
 
-### addScope(<string> $scope)
+### addScope(*string* $scope)
 
 To add one or more scope.
 
@@ -39,7 +39,7 @@ addScope('https://www.googleapis.com/auth/contacts https://www.googleapis.com/au
 
 This example script manages the sign-in and sign-out and displays five of your Google Contacts.
 
-As a prerequisite, you have to create a project in https://console.developers.google.com/ with an OAuth2 Web Client, enabled Google People API and allowed script uri as redirect uri.
+As a prerequisite, you have to create a project in https://console.developers.google.com/ with an OAuth2 Web Client, enabled Google People API and allowed script URI as redirect URI.
 
 ```php
 <?php
@@ -81,11 +81,12 @@ As a prerequisite, you have to create a project in https://console.developers.go
   else {
     // Show sign-out link
     echo '<p><a href="?action=signOut">Google sign-out</a></p>';
-    // List five contacts
+    // Call Google Contacts REST API
     $restUri = 'https://people.googleapis.com/v1/people/me/connections'
             . '?pageSize=5&personFields=names'
             . '&access_token=' . $auth->getToken();
     $response = json_decode(file_get_contents($restUri), true);
+    // List contacts
     foreach ($response['connections'] as $contact) {
       echo $contact['names'][0]['displayName'] . '<br />';
     }
