@@ -35,17 +35,11 @@
     echo '<p><a href="?action=signOut">Google sign-out</a></p>';
 
     /**
-     * List files from Google Drive
+     * Tests
      */
 
-    $files = $drive->search([
-      'q' => 'trashed=false and "root" in parents',
-      'orderBy' => 'name',
-      'pageSize' => 5
-    ]);
-    foreach ($files as $file) {
-      echo $file['name'] . '<br />';
-    }
+    $folder = $drive->ensureFolder('Main3/Sub/Sub Sub');
+    var_dump($folder);
 
   }
 

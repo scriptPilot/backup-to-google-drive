@@ -16,17 +16,53 @@ foreach ($files as $file) echo $file['name'] . '<br />';
 
 ## Methods
 
-### setFields(*string* $fields)
-
-tbd
-
 ### setToken(*string* $token)
 
-tbd
+Set new token for Google Drive API requests.
 
-### search(*string* $parameters)
+### setFields(*string* $fields)
 
-tbd
+Define returned file meta fields. Comma separated values, default is `id,name`.
+
+Available fields:
+https://developers.google.com/drive/v3/reference/files#resource
+
+### search(*array* $options)
+
+Perform search on folder and files. Returns file list.
+
+Parameters to be used are listed here:
+https://developers.google.com/drive/v3/reference/files/list
+
+### createFolder(*string/array* $properties)
+
+Create new folder or folder structure, return folder information.
+
+#### Examples
+
+```php
+// Create folder in Google Drive root
+createFolder('New Folder');
+
+// Create starred folder in Google Drive root
+createFolder(['name' => 'Starred folder', 'starred': true]);
+
+// Create new folder path
+createFolder('Main Folder/Sub Folder/Sub Sub Folder');
+
+// Return
+[
+  'id' => '1whjoGNwTcr4KD7sirAZyxMrAQJvhdyht',
+  'name' => 'Sub Sub Folder'
+]
+```
+
+The array accepts properties as listed here:
+https://developers.google.com/drive/v3/reference/files/create
+
+### ensureFolder(*string/array* $properties)
+
+Works like `createFolder()`, but if the folder exists, it will not create a new one.
 
 ## Example
 

@@ -7,7 +7,7 @@
    */
 
   // Check input
-  if (!is_array($parameters)) throw new Exception('Argument $parameters must be a string');
+  if (!is_array($parameters)) throw new Exception('Argument $parameters must be an array');
 
   // Create REST URI
   $baseUri = 'https://www.googleapis.com/drive/v3/files';
