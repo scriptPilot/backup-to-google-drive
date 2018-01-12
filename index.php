@@ -14,7 +14,7 @@
   require('lib/Google/Auth.php');
 
   /**
-   * Create class instances
+   * Create class objects
    */
 
   $auth = new \Google\Auth(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);

@@ -1,7 +1,0 @@
-{
-  "require": {
-    "google/apiclient": "^2.0",
-    "jeroendesloovere/vcard": "^1.5",
-    "php-curl-class/php-curl-class": "^8.0"
-  }
-}
