@@ -1,3 +1,40 @@
+# PHP Google Drive Wrapper
+
+## Usage
+
+```php
+// Require class file
+require('Drive.php');
+
+// Create drive object (with token)
+$auth = new \Google\Drive('valid-google-oauth2-token');
+
+// Call method
+$files = $drive->search(['q' => 'trashed=false and "root" in parents', 'pageSize' => 5]);
+foreach ($files as $file) echo $file['name'] . '<br />';
+```
+
+## Methods
+
+### setFields(*string* $fields)
+
+tbd
+
+### setToken(*string* $token)
+
+tbd
+
+### search(*string* $parameters)
+
+tbd
+
+## Example
+
+This example script manages the sign-in and sign-out and displays five of your Google Drive root folder files.
+
+As a prerequisite, you have to create a project in https://console.developers.google.com/ with an OAuth2 Web Client, enabled Google Drive API and allowed script URI as redirect URI.
+
+```php
 <?php
 
   /**
@@ -7,10 +44,17 @@
   header('Content-type: text/html;charset=utf-8');
 
   /**
-   * Load configuration and classes
+   * Set configuration constants
    */
 
-  require('config.php');
+  define('GOOGLE_CLIENT_ID', 'your-google-client-id');
+  define('GOOGLE_CLIENT_SECRET', 'your-google-client-secret');
+  define('GOOGLE_REDIRECT_URI', 'your-script-uri');
+
+  /**
+   * Load classes
+   */
+
   require('lib/Google/Auth.php');
   require('lib/Google/Drive.php');
 
@@ -50,3 +94,4 @@
   }
 
 ?>
+```

@@ -1,4 +1,8 @@
-<?php // Purpose: Handle Google OAuth2
+<?php
+
+  /**
+   * Purpose: Simplify Google OAuth2 process
+   */
 
   namespace Google;
 
