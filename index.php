@@ -38,9 +38,10 @@
      * Tests
      */
 
-    $export = $drive->export('1ZjkoE3kJxioLz2Vfo1CKKPrRq_DEhy1k0r3B1KF-guo', 'application/pdf');
-    file_put_contents('test.pdf', $export);
-
+    $file = $drive->createFolder('Test');
+    sleep(5);
+    $del = $drive->delete($file['id']);
+    var_dump($del);
   }
 
 ?>

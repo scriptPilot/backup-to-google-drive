@@ -38,6 +38,9 @@ https://developers.google.com/drive/v3/reference/files/list
 
 Create new folder or folder structure, return folder information.
 
+All properties:
+https://developers.google.com/drive/v3/reference/files/create
+
 #### Examples
 
 ```php
@@ -64,19 +67,41 @@ https://developers.google.com/drive/v3/reference/files/create
 
 Works like `createFolder()`, but if the folder exists, it will not create a new one.
 
-### upload(*string* $content, *array* $properties)
+### updateFolder(*string* id, *array* $properties)
 
-Upload a file to Google Drive. Properties `name` and `mimeType` are required.
-For the following file extensions, the mimeType is detected automatically:
-
-jpg / png / gif / txt / vcf
+Update folder properties.
 
 All properties:
 https://developers.google.com/drive/v3/reference/files/create
 
-### export(*string* $id, *string* mimeType)
+### createFile(*array* $properties, *string* $content)
 
-Export Google documents in several formats.
+Create a file to Google Drive. Properties `name` and `mimeType` are required.
+For the following file extensions, the mimeType is detected automatically:
+
+jpg, png, gif, txt, vcf, pdf
+
+All properties:
+https://developers.google.com/drive/v3/reference/files/create
+
+### updatefile(*string* $id, *array* $properties, [*string* $content])
+
+Update the file with `$id` in Google Drive. Only new or updated properties are to provide, the old ones will remain. A new `$content` is optional and must have the same mime type as the original file.
+
+All properties:
+https://developers.google.com/drive/v3/reference/files/create
+
+### getFile(*string* $id)
+
+Get file meta information. Returns array with meta information.
+
+### downloadFile(*string* id)
+
+Download file. Returns file content as string.
+
+### exportFile(*string* $id, *string* mimeType)
+
+Export Google documents in several formats. Returns exported file content as string.
 
 #### Example
 
@@ -84,6 +109,24 @@ Export Google documents in several formats.
 $content = $drive->export('3ZjkoE3kJxioLz2Vfo1CKKPrRq_DEhy1k0r3B1KF-guo', 'application/pdf');
 file_put_contents('exported_document.pdf', $content);
 ```
+
+### trash(*string* $id)
+
+Trash file or folder. Returns file information.
+
+### untrash(*string* $id)
+
+Untrash file or folder. Returns file information.
+
+### emptyTrash()
+
+Permanently deletes all of the user's trashed files. NO WAY BACK!
+Returns true or false.
+
+### delete(*string* $id)
+
+Delete file or folder. Returns file information. NO WAY BACK!
+Returns true or false.
 
 ## Example
 

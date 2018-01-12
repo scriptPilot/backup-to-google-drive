@@ -21,8 +21,7 @@
   curl_setopt_array($curl, [
     CURLOPT_URL => $restUri,
     CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_FAILONERROR => true,
-    CURLOPT_HEADERS
+    CURLOPT_FAILONERROR => true
   ]);
   $response = curl_exec($curl);
   if ($response !== false) {

@@ -1,8 +1,8 @@
 <?php
 
   /**
-   * Purpose: Upload file
-   * Input: <string> $content, <array> $properties
+   * Purpose: Create file
+   * Input: <array> $properties, <string> $content
    * Output: <array> $file
    */
 
@@ -13,15 +13,8 @@
 
   // Try to get mime type automatically from file extension
   if (!isset($properties['mimeType'])) {
-    $mimeTypes = [
-      '.jpg' => 'image/jpeg',
-      '.png' => 'image/png',
-      '.gif' => 'image/gif',
-      '.txt' => 'text/plain',
-      '.vcf' => 'text/x-vcard'
-    ];
-    $ext = substr($properties['name'], -4);
-    if (array_key_exists($ext, $mimeTypes)) $properties['mimeType'] = $mimeTypes[$ext];
+    $mimeType = $this->getMimeType($properties['name']);
+    if ($mimeType) $properties['mimeType'] = $mimeType;
     else throw new Exception('Argument $properties[\'mimeType\'] must be a string');
   }
 
