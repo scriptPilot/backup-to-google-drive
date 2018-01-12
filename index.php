@@ -1,93 +1,43 @@
 <?php
 
   /**
-   * Include config and modules
-   */
+  * Set content type
+  */
 
-  // Include configuration
-  require_once('config.php');
-
-  // Include vendor modules
-  require_once('vendor/autoload.php');
-
-  // Include functions
-  $functionsDir = opendir('functions');
-  while ($file = readdir($functionsDir)) if ($file !== '.' && $file !== '..') require_once('functions/' . $file);
-
-  // Extend script timeout to 24 hours
-  set_time_limit(60 * 60 * 24);
+  header('Content-type: text/html;charset=utf-8');
 
   /**
-   * Init Google client and service
+   * Load configuration and classes
    */
 
-  $googleClient = createGoogleClient([
-    'https://www.googleapis.com/auth/contacts',
-    'https://picasaweb.google.com/data/',
-    'https://www.googleapis.com/auth/drive'
-  ]);
-  $googleDriveService = new Google_Service_Drive($googleClient);
+  require('config.php');
+  require('lib/Google/Auth.php');
 
   /**
-   * Show header
+   * Create class instances
    */
 
-  showHeader();
+  $auth = new \Google\Auth(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
+  $auth->addScope('https://www.googleapis.com/auth/contacts');
 
   /**
-   * Show logout link
+   * Actions
    */
 
-  echo '<a href="index.php?googleLogout">Google logout</a><br />'
-     . '<br />';
-
-  /**
-   * Show form
-   */
-
-  echo '<form method="post" action="index.php">'
-     . 'Synchronization / Destination Folders:<br />'
-     . '<br />'
-     . '<input type="checkbox" name="backupContacts" value="yes" ' . (($_POST['backupContacts'] === 'yes' or !$_POST) ? 'checked="checked"' : '') . ' /> &nbsp; <input type="text" name="contactsFolder" value="' . (isset($_POST['contactsFolder']) ? $_POST['contactsFolder'] : DEFAULT_BACKUP_FOLDER_CONTACTS) . '" size="50" /> for contacts<br />'
-     . '<input type="checkbox" name="backupAlbums" value="yes" ' . (($_POST['backupAlbums'] === 'yes' or !$_POST) ? 'checked="checked"' : '') . ' /> &nbsp; <input type="text" name="albumsFolder" value="' . (isset($_POST['albumsFolder']) ? $_POST['albumsFolder'] : DEFAULT_BACKUP_FOLDER_ALBUMS) . '" size="50" /> for albums<br />'
-     . '<br />'
-     . '<input type="submit" value="Start backup" onclick="this.value=\'Please wait ...\'" />'
-     . '</form>';
-
-  /**
-   * Form submitted
-   */
-
-  if ($_POST) {
-
-    // Check folders
-    if ($_POST['backupContacts'] === 'yes' and trim($_POST['contactsFolder']) === '') {
-      echo '<span style="color: red">Please type contacts folder</span><br />';
-    } else if ($_POST['backupAlbums'] === 'yes' and trim($_POST['albumsFolder']) === '') {
-      echo '<span style="color: red">Please type albums folder</span><br />';
-    } else if ($_POST['backupContacts'] === 'yes' || $_POST['backupAlbums'] === 'yes') {
-
-      // Remember start time
-      $startTime = time();
-
-      // Do backup
-      if ($_POST['backupContacts'] === 'yes') backupContacts($googleDriveService);
-      if ($_POST['backupAlbums'] === 'yes') backupAlbums($googleDriveService);
-
-      // Show run time
-      $endTime = time();
-      $duration = $endTime - $startTime;
-      echo '<br />'
-         . '<span style="color: grey">Run: ' . date('H:i:s') . ' / ' . $duration . ' second' . ($duration !== 1 ? 's' : '') . '</span>';
-
+  if ($_GET['action'] === 'signIn') $auth->signIn();
+  else if ($_GET['action'] === 'signOut') $auth->signOut();
+  else if (!$auth->getToken()) echo '<p><a href="?action=signIn">Sign-in to Google</a></p>';
+  else {
+    // Show sign-out link
+    echo '<p><a href="?action=signOut">Google sign-out</a></p>';
+    // List five contacts
+    $restUri = 'https://people.googleapis.com/v1/people/me/connections'
+            . '?pageSize=5&personFields=names'
+            . '&access_token=' . $auth->getToken();
+    $response = json_decode(file_get_contents($restUri), true);
+    foreach ($response['connections'] as $contact) {
+      echo $contact['names'][0]['displayName'] . '<br />';
     }
-
   }
-
-  /**
-   * Show footer
-   */
-
-  showFooter();
 
 ?>
