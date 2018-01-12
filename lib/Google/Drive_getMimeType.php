@@ -14,11 +14,12 @@
     '.png' => 'image/png',
     '.gif' => 'image/gif',
     '.txt' => 'text/plain',
+    '.json' => 'application/json',
     '.vcf' => 'text/x-vcard',
     '.pdf' => 'application/pdf'
   ];
-  $ext = substr($fileName, -4);
-  if (array_key_exists($ext, $mimeTypes)) $mimeType = $mimeTypes[$ext];
+  if (array_key_exists(substr($fileName, -5), $mimeTypes)) $mimeType = $mimeTypes[substr($fileName, -5)];
+  else if (array_key_exists(substr($fileName, -4), $mimeTypes)) $mimeType = $mimeTypes[substr($fileName, -4)];
   else $mimeType = null;
 
 ?>

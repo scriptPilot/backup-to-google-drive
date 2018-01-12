@@ -79,7 +79,7 @@ https://developers.google.com/drive/v3/reference/files/create
 Create a file to Google Drive. Properties `name` and `mimeType` are required.
 For the following file extensions, the mimeType is detected automatically:
 
-jpg, png, gif, txt, vcf, pdf
+jpg, png, gif, txt, json, vcf, pdf
 
 All properties:
 https://developers.google.com/drive/v3/reference/files/create
