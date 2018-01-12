@@ -38,8 +38,8 @@
      * Tests
      */
 
-    $folder = $drive->ensureFolder('Main3/Sub/Sub Sub');
-    var_dump($folder);
+    $export = $drive->export('1ZjkoE3kJxioLz2Vfo1CKKPrRq_DEhy1k0r3B1KF-guo', 'application/pdf');
+    file_put_contents('test.pdf', $export);
 
   }
 

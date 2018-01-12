@@ -7,7 +7,7 @@
 require('Drive.php');
 
 // Create drive object (with token)
-$auth = new \Google\Drive('valid-google-oauth2-token');
+$drive = new \Google\Drive('valid-google-oauth2-token');
 
 // Call method
 $files = $drive->search(['q' => 'trashed=false and "root" in parents', 'pageSize' => 5]);
@@ -22,7 +22,7 @@ Set new token for Google Drive API requests.
 
 ### setFields(*string* $fields)
 
-Define returned file meta fields. Comma separated values, default is `id,name`.
+Define returned file meta fields. Comma separated values, default is `id,name,description,mimeType`.
 
 Available fields:
 https://developers.google.com/drive/v3/reference/files#resource
@@ -63,6 +63,27 @@ https://developers.google.com/drive/v3/reference/files/create
 ### ensureFolder(*string/array* $properties)
 
 Works like `createFolder()`, but if the folder exists, it will not create a new one.
+
+### upload(*string* $content, *array* $properties)
+
+Upload a file to Google Drive. Properties `name` and `mimeType` are required.
+For the following file extensions, the mimeType is detected automatically:
+
+jpg / png / gif / txt / vcf
+
+All properties:
+https://developers.google.com/drive/v3/reference/files/create
+
+### export(*string* $id, *string* mimeType)
+
+Export Google documents in several formats.
+
+#### Example
+
+```php
+$content = $drive->export('3ZjkoE3kJxioLz2Vfo1CKKPrRq_DEhy1k0r3B1KF-guo', 'application/pdf');
+file_put_contents('exported_document.pdf', $content);
+```
 
 ## Example
 
