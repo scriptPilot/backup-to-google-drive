@@ -110,6 +110,10 @@ $content = $drive->export('3ZjkoE3kJxioLz2Vfo1CKKPrRq_DEhy1k0r3B1KF-guo', 'appli
 file_put_contents('exported_document.pdf', $content);
 ```
 
+### rename(*string* $id, *string* $name)
+
+Rename file or folder. Returns file information.
+
 ### trash(*string* $id)
 
 Trash file or folder. Returns file information.

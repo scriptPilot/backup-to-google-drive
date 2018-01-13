@@ -40,6 +40,7 @@
     public function getFile($id) { require(__DIR__ . '/Drive_getFile.php'); return $file; }
     public function downloadFile($id) { require(__DIR__ . '/Drive_downloadFile.php'); return $content; }
     public function exportFile($id, $mimeType) { require(__DIR__ . '/Drive_exportFile.php'); return $content; }
+    public function rename($id, $name) { require(__DIR__ . '/Drive_rename.php'); return $file; }
     public function trash($id) { require(__DIR__ . '/Drive_trash.php'); return $file; }
     public function untrash($id) { require(__DIR__ . '/Drive_untrash.php'); return $file; }
     public function emptyTrash() { require(__DIR__ . '/Drive_emptyTrash.php'); return $trashed; }

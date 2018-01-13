@@ -1,10 +1,11 @@
 <?php
 
   /**
-  * Set content type
+  * Set content type and time zone
   */
 
   header('Content-type: text/html;charset=utf-8');
+  date_default_timezone_set('Europe/Berlin');
 
   /**
    * Load configuration and classes
@@ -32,19 +33,14 @@
   if ($_GET['action'] === 'signIn') $auth->signIn();
   else if ($_GET['action'] === 'signOut') $auth->signOut();
   else if (!$auth->getToken()) echo '<p><a href="?action=signIn">Sign-in to Google</a></p>';
+  else if ($_GET['action'] === 'syncAlbums') require('index_syncAlbums.php');
   else {
 
     // Show sign-out link
     echo '<p><a href="?action=signOut">Google sign-out</a></p>';
 
-    /**
-     * Tests
-     */
-
-    $res = $photos->getPhotos('6438594429628867473');
-    echo '<pre>';
-    print_r($res);
-    echo '</pre>';
+    // Show album sync link
+    echo '<p><a href="?action=syncAlbums">Sync Albums</a></p>';
 
   }
 
