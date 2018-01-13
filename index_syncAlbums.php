@@ -187,7 +187,7 @@
       $albumKeys = array_keys($_SESSION['albums']);
 
       // Loop album keys
-      while ($stateAlbum <= count($_SESSION['albums']) && time() - $start < 5) {
+      while ($stateAlbum <= count($_SESSION['albums']) && time() - $start < 20) {
 
         // Get current key = ident
         $ident = $albumKeys[$stateAlbum - 1];
@@ -207,6 +207,7 @@
             $_SESSION['folders'][$ident] = $newFolder;
           } else logText('[ERROR] Failed to create folder "' . $album['name'] . '"');
         }
+        $folder = $_SESSION['folders'][$ident];
 
         // Load all photos, add identifier > log
         $allPhotos = [];
@@ -216,6 +217,16 @@
         }
         $_SESSION['photos'] = $allPhotos;
         logText(count($allPhotos) . ' photo' . (count($allPhotos) !== 1 ? 's' : '') . ' found in album "' . $album['name'] . '"');
+
+        // Load all files, add identifier > log
+        $allFiles = [];
+        $filesSearch = $drive->search(['q' => 'trashed=false and "' . $file['id'] . '" in parents', 'orderBy' => 'name', 'pageSize' => 1000]);
+        foreach ($filesSearch as $currentFile) {
+          $ident = (!$currentFile['description'] || $currentFile['description'] === '' || array_key_exists($currentFile['description'], $allFiles)) ? $currentFile['id'] : $currentFile['description'];
+          $allFiles[$ident] = $currentFile;
+        }
+        $_SESSION['files'] = $allFiles;
+        logText(count($allFiles) . ' file' . (count($allFiles) !== 1 ? 's' : '') . ' found in folder "' . $folder['name'] . '"');
 
         // Increase $stateAlbum
         $stateAlbum++;

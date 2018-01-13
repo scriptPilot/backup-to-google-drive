@@ -1,18 +1,16 @@
-13.01.2018 02:36:16 - Clean-up done
-13.01.2018 02:36:16 - Next state: index.php?action=syncAlbums&step=loadAlbums
-13.01.2018 02:36:23 - 29 albums found in Google Photos
-13.01.2018 02:36:23 - Next state: index.php?action=syncAlbums&step=loadFolders
-13.01.2018 02:36:24 - 28 folders found in Google Drive
-13.01.2018 02:36:24 - Next state: index.php?action=syncAlbums&step=loopFolders
-13.01.2018 02:36:24 - Next state: index.php?action=syncAlbums&step=loopAlbums
-13.01.2018 02:36:24 - Next state: index.php?action=syncAlbums&step=loopAlbums&album=1
-13.01.2018 02:36:27 - 26 photos found in album "Baby"
-13.01.2018 02:36:29 - 17 photos found in album "Dokumente Anika"
-13.01.2018 02:36:29 - Next state: index.php?action=syncAlbums&step=loopAlbums&album=3
-13.01.2018 02:36:31 - 34 photos found in album "Dokumente Eltern"
-13.01.2018 02:36:34 - 172 photos found in album "Taufe Henrik (alle)"
-13.01.2018 02:36:34 - Next state: index.php?action=syncAlbums&step=loopAlbums&album=5
-13.01.2018 02:36:37 - 161 photos found in album "Ötztal"
-13.01.2018 02:36:39 - 22 photos found in album "Collage Flur"
-13.01.2018 02:36:39 - Next state: index.php?action=syncAlbums&step=loopAlbums&album=7
-13.01.2018 02:36:41 - 12 photos found in album "Kalender Uschi & Otto 2018"
+13.01.2018 02:44:34 - Clean-up done
+13.01.2018 02:44:34 - Next state: index.php?action=syncAlbums&step=loadAlbums
+13.01.2018 02:44:42 - 29 albums found in Google Photos
+13.01.2018 02:44:42 - Next state: index.php?action=syncAlbums&step=loadFolders
+13.01.2018 02:44:43 - 29 folders found in Google Drive
+13.01.2018 02:44:43 - Next state: index.php?action=syncAlbums&step=loopFolders
+13.01.2018 02:44:44 - Next state: index.php?action=syncAlbums&step=loopAlbums
+13.01.2018 02:44:44 - Next state: index.php?action=syncAlbums&step=loopAlbums&album=1
+13.01.2018 02:44:46 - 26 photos found in album "Baby"
+13.01.2018 02:44:47 - 0 files found in folder "Baby"
+13.01.2018 02:44:51 - 17 photos found in album "Dokumente Anika"
+13.01.2018 02:44:51 - 0 files found in folder "Dokumente Anika"
+13.01.2018 02:44:54 - 34 photos found in album "Dokumente Eltern"
+13.01.2018 02:44:55 - 0 files found in folder "Dokumente Eltern"
+13.01.2018 02:44:58 - 172 photos found in album "Taufe Henrik (alle)"
+13.01.2018 02:44:58 - 0 files found in folder "Taufe Henrik (alle)"
