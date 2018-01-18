@@ -8,16 +8,18 @@
    * Common settings, Google object initialization
    */
   require('common.php');
+  $maxRuntime = 15 * 60; // if tokens are updated every five minutes (55 min lifetime minimum), 50*60 seconds is a good value
 
   /**
    * Lock cronjob
    */
 
   $lockFile = 'cron_syncAlbums.lock.log';
+  $scriptStartTime = time();
   if (file_exists($lockFile)) {
     $start = intval(file_get_contents($lockFile));
-    $duration = time() - $start;
-    if ($duration > 1800) {
+    $duration = $scriptStartTime - $start;
+    if ($duration > $maxRuntime) {
       echo '<span style="color: red">Process locked for ' . $duration . ' seconds now</span><br />';
       echo '<b style="color: red">Cronjob finished with an error</b>';
     } else {
@@ -26,7 +28,7 @@
     }
     exit();
   } else {
-    file_put_contents($lockFile, time());
+    file_put_contents($lockFile, $scriptStartTime);
   }
 
   $errors = 0;
@@ -153,6 +155,15 @@
             // Loop files
             foreach ($allFiles as $fileIdent => $file) {
 
+              // Finish script five seconds before max runtime exceeded
+              if (time() - $scriptStartTime > $maxRuntime - 5) {
+                echo 'Maximum runtime of ' . $maxRuntime . ' seconds exceeded<br />';
+                if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull</b><br />';
+                else echo '<b style="color: red">Cronjob finished with ' . $errors . ' error' . ($errors !== 1? 's' : '') . '</b><br />';
+                unlink($lockFile);
+                exit();
+              }
+
               // No match > trash
               if (!isset($allPhotos[$fileIdent])) {
 
@@ -189,6 +200,15 @@
                 } else {
                   echo '<span style="color: red">- Failed to create file "' . $photo['fileName'] . '"</span><br />';
                 }
+              }
+
+              // Finish script five seconds before max runtime exceeded
+              if (time() - $scriptStartTime > $maxRuntime - 5) {
+                echo 'Maximum runtime of ' . $maxRuntime . ' seconds exceeded<br />';
+                if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull</b><br />';
+                else echo '<b style="color: red">Cronjob finished with ' . $errors . ' error' . ($errors !== 1? 's' : '') . '</b><br />';
+                unlink($lockFile);
+                exit();
               }
 
             }

@@ -26,6 +26,16 @@
     // Show sign-out link
     echo '<p><a href="?action=signOut">Google sign-out</a></p>';
 
+    // Connected services
+    echo '<h2>Connected services</h2>';
+
+    // RememberTheMilk
+    if ($_GET['action'] === 'addRTM') {
+      echo '<p>Get ...</p>';
+    } else {
+      echo '<p><a href="">Add Remember The Milk</a></p>';
+    }
+
     // Save(update)/delete user credentials
     echo '<h2>Backup script</h2>';
     $credentialsFile = '.credentials/' . $user['id'] . '.php';
