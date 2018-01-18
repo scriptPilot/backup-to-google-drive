@@ -47,7 +47,7 @@
          . ($album ? '&album=' . $album : '')
          . ($file ? '&file=' . $file : '')
          . ($photo ? '&photo=' . $photo : '');
-    logText('Next state: ' . $uri);
+    //logText('Next state: ' . $uri);
     header('Refresh: 0; url=' . $uri);
   }
 
@@ -180,63 +180,160 @@
     // Loop album
     } else {
 
-      // Remember start time
-      $start = time();
-
       // Get album keys
       $albumKeys = array_keys($_SESSION['albums']);
 
-      // Loop album keys
-      while ($stateAlbum <= count($_SESSION['albums']) && time() - $start < 20) {
+      // Get current key = ident
+      $ident = $albumKeys[$stateAlbum - 1];
 
-        // Get current key = ident
-        $ident = $albumKeys[$stateAlbum - 1];
+      // Get current album
+      $album = $_SESSION['albums'][$ident];
 
-        // Get current album
-        $album = $_SESSION['albums'][$ident];
+      // Create folder is not exists
+      if (!isset($_SESSION['folders'][$ident])) {
+        $newFolder = $drive->createFolder([
+          'name' => $album['name'],
+          'parents' => [$_SESSION['backupFolder']],
+          'description' => $ident
+        ]);
+        if ($newFolder) {
+          logText('Folder "' . $album['name'] . '" created');
+          $_SESSION['folders'][$ident] = $newFolder;
+        } else logText('[ERROR] Failed to create folder "' . $album['name'] . '"');
+      }
+      $folder = $_SESSION['folders'][$ident];
 
-        // Create folder is not exists
-        if (!isset($_SESSION['folders'][$ident])) {
-          $newFolder = $drive->createFolder([
-            'name' => $album['name'],
-            'parents' => [$_SESSION['backupFolder']],
-            'description' => $ident
-          ]);
-          if ($newFolder) {
-            logText('Folder "' . $album['name'] . '" created');
-            $_SESSION['folders'][$ident] = $newFolder;
-          } else logText('[ERROR] Failed to create folder "' . $album['name'] . '"');
-        }
-        $folder = $_SESSION['folders'][$ident];
-
-        // Load all photos, add identifier > log
-        $allPhotos = [];
-        foreach ($photos->getPhotos($album['id']) as $currentPhoto) {
+      // Load all photos, add identifier and filename > log
+      $allPhotos = [];
+      $getPhotos = $photos->getPhotos($album['id']);
+      $photoNo = 0;
+      foreach ($getPhotos as $currentPhoto) {
+        $photoNo++;
+        if (substr($currentPhoto['mimeType'], 0, 6) === 'image/') {
+          $ext = str_replace('jpeg', 'jpg', substr($currentPhoto['mimeType'], 6));
+          $currentPhoto['fileName'] = $album['name'] . ' #' . str_pad($photoNo, strlen(count($getPhotos)), '0', STR_PAD_LEFT) . '.' . $ext;
           $photoIdent = 'album/' . $album['id'] . '/photo/' . $currentPhoto['id'] . '/updated/' . $currentPhoto['updated'];
           $allPhotos[$photoIdent] = $currentPhoto;
+        } else {
+          logText('Skip file ' . $currentPhoto['name']);
         }
-        $_SESSION['photos'] = $allPhotos;
-        logText(count($allPhotos) . ' photo' . (count($allPhotos) !== 1 ? 's' : '') . ' found in album "' . $album['name'] . '"');
-
-        // Load all files, add identifier > log
-        $allFiles = [];
-        $filesSearch = $drive->search(['q' => 'trashed=false and "' . $file['id'] . '" in parents', 'orderBy' => 'name', 'pageSize' => 1000]);
-        foreach ($filesSearch as $currentFile) {
-          $ident = (!$currentFile['description'] || $currentFile['description'] === '' || array_key_exists($currentFile['description'], $allFiles)) ? $currentFile['id'] : $currentFile['description'];
-          $allFiles[$ident] = $currentFile;
-        }
-        $_SESSION['files'] = $allFiles;
-        logText(count($allFiles) . ' file' . (count($allFiles) !== 1 ? 's' : '') . ' found in folder "' . $folder['name'] . '"');
-
-        // Increase $stateAlbum
-        $stateAlbum++;
-
       }
+      $_SESSION['photos'] = $allPhotos;
+      logText(count($allPhotos) . ' photo' . (count($allPhotos) !== 1 ? 's' : '') . ' found in album "' . $album['name'] . '"');
+
+      // Load all files, add identifier > log
+      $allFiles = [];
+      $filesSearch = $drive->search(['q' => 'trashed=false and "' . $folder['id'] . '" in parents', 'orderBy' => 'name', 'pageSize' => 1000]);
+      foreach ($filesSearch as $currentFile) {
+        $ident = (!$currentFile['description'] || $currentFile['description'] === '' || array_key_exists($currentFile['description'], $allFiles)) ? $currentFile['id'] : $currentFile['description'];
+        $allFiles[$ident] = $currentFile;
+      }
+      $_SESSION['files'] = $allFiles;
+      logText(count($allFiles) . ' file' . (count($allFiles) !== 1 ? 's' : '') . ' found in folder "' . $folder['name'] . '"');
 
       // Next state
-      if ($stateAlbum > count($_SESSION['albums'])) nextState('completed');
-      else nextState('loopAlbums', $stateAlbum);
+      nextState('loopFiles', $stateAlbum, 1);
 
+    }
+
+  }
+
+  /**
+   * Loop files
+   */
+
+  if ($stateStep === 'loopFiles') {
+
+    // No file state
+    if ($stateFile === null) {
+      nextState('loopFiles', $stateAlbum, 1);
+
+    // File state above number of files
+    } else if ($stateFile > count($_SESSION['files'])) {
+      nextState('loopPhotos', $stateAlbum, null, 1);
+
+    // Loop files
+    } else {
+      $start = time();
+      $keys = array_keys($_SESSION['files']);
+      while ($stateFile <= count($_SESSION['files']) && time()-$start < 20) {
+
+        // Get current file
+        $ident = $keys[$stateFile - 1];
+        $file = $_SESSION['files'][$ident];
+
+        // No match > trash
+        if (!isset($_SESSION['photos'][$ident])) {
+
+          $trash = $drive->trash($file['id']);
+          if ($trash) logText('File "' . $file['name'] . '" trashed');
+            else logText('[ERROR] Failed to trash file "' . $file['name'] . '"');
+
+        // Name changed > rename
+        } else if ($file['name'] !== $_SESSION['photos'][$ident]['fileName']) {
+          $rename = $drive->rename($file['id'], $_SESSION['photos'][$ident]['fileName']);
+          if ($rename) logText('File "' . $file['name'] . '" renamed to "' . $_SESSION['photos'][$ident]['fileName'] . '"');
+            else logText('[ERROR] Failed to rename file "' . $file['name'] . '"');
+        }
+
+        // Next file
+        $stateFile += 1;
+
+      }
+      if ($stateFile > count($_SESSION['files'])) nextState('loopPhotos', $stateAlbum, null, 1);
+      else nextState('loopFiles', $stateAlbum, $stateFile);
+    }
+
+  }
+
+  /**
+   * Loop photos
+   */
+
+  if ($stateStep === 'loopPhotos') {
+
+    // No photo state
+    if ($statePhoto === null) {
+      nextState('loopPhotos', $stateAlbum, null, 1);
+
+    // Photo state above number of photos
+    } else if ($statePhoto > count($_SESSION['photos'])) {
+      nextState('loopAlbums', $stateAlbum += 1);
+
+    // Loop photos
+    } else {
+      $start = time();
+      $keys = array_keys($_SESSION['photos']);
+      $keysAlbum = array_keys($_SESSION['albums']);
+      $folderId = $_SESSION['folders'][$keysAlbum[$stateAlbum - 1]]['id'];
+      while ($statePhoto <= count($_SESSION['photos']) && time()-$start < 20) {
+
+        // Get current photo
+        $ident = $keys[$statePhoto - 1];
+        $photo = $_SESSION['photos'][$ident];
+
+        // Create photo is not exists
+        if (!isset($_SESSION['files'][$ident])) {
+
+          $newPhoto = $drive->createFile([
+            'name' => $photo['fileName'],
+            'parents' => [$folderId],
+            'description' => $ident
+          ], file_get_contents($photo['uri'] . '?imgmax=9999'));
+          if ($newPhoto) {
+            logText('File "' . $photo['fileName'] . '" created');
+            $_SESSION['files'][$ident] = $newPhoto;
+          } else logText('[ERROR] Failed to create file "' . $photo['fileName'] . '"');
+
+
+        }
+
+        // Next file
+        $statePhoto += 1;
+
+      }
+      if ($statePhoto > count($_SESSION['photos'])) nextState('loopAlbums', $stateAlbum += 1);
+      else nextState('loopPhotos', $stateAlbum, null, $statePhoto);
     }
 
   }
@@ -247,7 +344,17 @@
 
   if ($stateStep === 'completed') {
 
+    // Clear session
+    unset($_SESSION['albums']);
+    unset($_SESSION['folders']);
+    unset($_SESSION['files']);
+    unset($_SESSION['photos']);
+    unset($_SESSION['backupFolder']);
+    logText('Cleaned-up the session');
+
     logText('Synchronization completed successfully');
+
+    rename('syncAlbums.log', 'syncAlbums - ' . date('d.m.Y H:i:s') . '.log');
 
     echo '<p><b>Synchronization completed successfully</b></p>'
        . '<p><a href="index.php">go to index page</a></p>';

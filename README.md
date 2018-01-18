@@ -4,9 +4,9 @@
 
 ## Scope
 
-* [x] Google Contacts (with contact photos)
+* [ ] Google Contacts (with contact photos)
 * [ ] Google Calendars
-* [ ] Google Photos Albums
+* [x] Google Photos Albums
 * [ ] Remember The Milk (with completed tasks)
 * [ ] GitHub Repositories (with issues)
 * [ ] Firebase projects (databases and users)
@@ -15,9 +15,8 @@
 
 1. Create Google API Key and OAuth2 Client
 2. Save config.example.php as config.php and update values
-3. Run php composer install
-4. Upload files to server
-5. Open index.php on server
+3. Upload files to server
+4. Open index.php on server
 
 ## Notes
 

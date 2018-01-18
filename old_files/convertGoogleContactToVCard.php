@@ -19,6 +19,7 @@
     $vcard->addName($familyName, $givenName);
 
     // Add phone numbers
+    $contact['givenName']
     if (isset($googleContact['phoneNumbers'])) {
       foreach ($googleContact['phoneNumbers'] as $number) {
         $tel = isset($number['canonicalForm']) ? $number['canonicalForm'] : $number['value'];

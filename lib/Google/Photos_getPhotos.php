@@ -31,7 +31,7 @@
         'name' => $photoRaw['title']['$t'],
         'mimeType' => $photoRaw['content']['type'],
         'uri' => $photoRaw['content']['src'],
-        'udpated' => $photoRaw['updated']['$t']
+        'updated' => $photoRaw['updated']['$t']
       ];
       $photos[] = $photo;
     }

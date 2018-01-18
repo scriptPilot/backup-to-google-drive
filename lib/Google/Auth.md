@@ -71,6 +71,10 @@ getCredentials();
 
 Return *string* token or *null*. You should use this function to decide whether the user is signed-in or not.
 
+### getUserInfo()
+
+Return *array* with information of the signed-in user (id, etag, displayName, photoUri). Returns *null* if the user is not signed-in. Returns *false* in case of any error.
+
 ### signIn()
 
 Forward to Google sign-in page and handle the further process. At the end, the authentication objects should have new credentials. They are stored in the session with `$_SESSION['GOOGLE_CREDENTIALS']` as well.
@@ -78,6 +82,10 @@ Forward to Google sign-in page and handle the further process. At the end, the a
 ### signOut()
 
 Remove credentials from authentication object and session.
+
+### refreshToken()
+
+Refresh token and return *array* with new credentials or *false* on any error.
 
 ## Example
 

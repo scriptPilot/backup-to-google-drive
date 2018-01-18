@@ -39,6 +39,8 @@
     public function setCredentials($credentials) { require(__DIR__ . '/Auth_setCredentials.php'); }
     public function getCredentials() { require(__DIR__ . '/Auth_getCredentials.php'); return $credentials; }
     public function getToken() { require(__DIR__ . '/Auth_getToken.php'); return $token; }
+    public function getUserInfo() { require(__DIR__ . '/Auth_getUserInfo.php'); return $userInfo; }
+    public function refreshToken() { require(__DIR__ . '/Auth_refreshToken.php'); return $credentials; }
     public function signIn() { require(__DIR__ . '/Auth_signIn.php'); }
     public function signOut() { require(__DIR__ . '/Auth_signOut.php'); }
 

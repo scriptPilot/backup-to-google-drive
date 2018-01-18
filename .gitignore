@@ -8,3 +8,6 @@ config.php
 
 # Exclude log files
 *.log*
+
+# Exclude credentials folder
+.credentials/
