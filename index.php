@@ -16,6 +16,8 @@
   else if ($_GET['action'] === 'syncAlbums') require('index_syncAlbums.php');
   else {
 
+    $drive->touch('1hLfpwLKL1kcnVRQiQ68UzJQc0vx4ol4m');
+
     // Show user info
     $user = $auth->getUserInfo();
     echo '<h1>' . $user['displayName'] . '</h1>';
@@ -25,7 +27,7 @@
     echo '<p><a href="?action=signOut">Google sign-out</a></p>';
 
     // Save(update)/delete user credentials
-    echo '<h2>Cronjobs</h2>';
+    echo '<h2>Backup jobs</h2>';
     $credentialsFile = '.credentials/' . $user['id'] . '.php';
     if ($_GET['action'] === 'saveCredentials' or (file_exists($credentialsFile) && $_GET['action'] !== 'deleteCredentials')) {
       $content = '<?php'. "\n"
@@ -45,15 +47,6 @@
       echo '<p style="color: green"><b>Active</b></p>';
       echo '<p><a href="?action=deleteCredentials">Delete saved credentials</a></p>';
     }
-
-    // Synchronization tasks
-    echo '<h2>Synchronization tasks</h2>';
-
-    // Show contacts sync link
-    echo '<p><a href="cron_syncContacts.php">Sync Contacts</a></p>';
-
-    // Show album sync link
-    echo '<p><a href="?action=syncAlbums">Sync Albums</a></p>';
 
   }
 

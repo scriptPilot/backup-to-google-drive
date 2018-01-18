@@ -16,7 +16,7 @@ foreach ($files as $file) echo $file['name'] . '<br />';
 
 ## Methods
 
-### setToken(*string* $token)
+### setToken(*string/null* $token)
 
 Set new token for Google Drive API requests.
 
@@ -113,6 +113,10 @@ file_put_contents('exported_document.pdf', $content);
 ### rename(*string* $id, *string* $name)
 
 Rename file or folder. Returns file information.
+
+### touch(*string* id)
+
+Touch file (update updated time) recursively up to the root folder. Returns *true* or *false*.
 
 ### trash(*string* $id)
 

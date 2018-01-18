@@ -78,8 +78,9 @@
         foreach ($allFiles as $ident => $file) {
           if (!array_key_exists($ident, $allContacts)) {
             $trashed = $drive->trash($file['id']);
-            if ($trashed) echo '<span style="color: orange">- Trashed file "'. $file['name'] . '"</span><br />';
-            else {
+            if ($trashed) {
+              echo '<span style="color: orange">- Trashed file "'. $file['name'] . '"</span><br />';
+            } else {
               echo '<span style="color: red">- Failed to trash "'. $file['name'] . '"</span><br />';
               $errors += 1;
             }
@@ -91,8 +92,9 @@
           if (!array_key_exists($ident, $allFiles)) {
             $content = $contacts->createVCard($contact);
             $created = $drive->createFile(['name' => $contact['displayName'] . '.vcf', 'description' => $ident, 'parents' => [$folderId]], $content);
-            if ($created) echo '<span style="color: blue">- Created file "'. $created['name'] . '"</span><br />';
-            else {
+            if ($created) {
+              echo '<span style="color: blue">- Created file "'. $created['name'] . '"</span><br />';
+            } else {
               echo '<span style="color: red">- Failed to create "'. $created['name'] . '"</span><br />';
               $errors += 1;
             }

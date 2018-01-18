@@ -16,7 +16,7 @@ foreach ($contacts as $contact) echo $contact['displayName'] . '<br />';
 
 ## Methods
 
-### setToken(*string* $token)
+### setToken(*string/null* $token)
 
 Set new token for Google Drive API requests.
 

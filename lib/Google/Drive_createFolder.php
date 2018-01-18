@@ -66,10 +66,12 @@
   // Path provided (= new folder structure)
   if (is_string($properties) && strpos($properties, '/') > -1) {
     $folder = createFolderRecursively(explode('/', $properties), 'root', $this->token);
+    $this->touch($folder['id']);
 
   // No path provided
   } else {
     $folder = createFolder($properties, $this->token);
+    $this->touch($folder['id']);
   }
 
 ?>

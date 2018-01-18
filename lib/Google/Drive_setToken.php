@@ -7,7 +7,7 @@
    */
 
   // Check input
-  if (!is_string($token)) throw new Exception('Argument $token must be a string');
+  if (!is_string($token) && $token !== null) throw new Exception('Argument $token must be a string or null');
 
   // Update property
   $this->token = $token;

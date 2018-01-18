@@ -31,6 +31,7 @@
   $response = curl_exec($curl);
   if ($response !== false) {
     $folder = json_decode($response, true);
+    $this->touch($folder['id']);
   } else {
     $folder = false;
   }

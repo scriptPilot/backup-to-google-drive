@@ -68,6 +68,7 @@
   $response = curl_exec($curl);
   if ($response !== false) {
     $file = json_decode($response, true);
+    $this->touch($file['id']);
   } else {
     $file = false;
   }

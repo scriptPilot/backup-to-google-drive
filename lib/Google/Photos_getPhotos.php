@@ -25,15 +25,17 @@
   if ($response !== false) {
     $photos = [];
     $photosRaw = json_decode($response, true)['feed']['entry'];
-    foreach ($photosRaw as $photoRaw) {
-      $photo = [
-        'id' => $photoRaw['gphoto$id']['$t'],
-        'name' => $photoRaw['title']['$t'],
-        'mimeType' => $photoRaw['content']['type'],
-        'uri' => $photoRaw['content']['src'],
-        'updated' => $photoRaw['updated']['$t']
-      ];
-      $photos[] = $photo;
+    if (is_array($photosRaw)) {
+      foreach ($photosRaw as $photoRaw) {
+        $photo = [
+          'id' => $photoRaw['gphoto$id']['$t'],
+          'name' => $photoRaw['title']['$t'],
+          'mimeType' => $photoRaw['content']['type'],
+          'uri' => $photoRaw['content']['src'],
+          'updated' => $photoRaw['updated']['$t']
+        ];
+        $photos[] = $photo;
+      }
     }
   } else {
     $photos = false;

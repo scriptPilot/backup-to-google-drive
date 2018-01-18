@@ -9,6 +9,9 @@
   // Check input
   if (!is_string($id)) throw new Exception('Argument $id must be a string');
 
+  // Touch containing folder
+  $this->touch($id);
+
   // Set correct mime type
   $properties['mimeType'] = 'application/vnd.google-apps.folder';
 

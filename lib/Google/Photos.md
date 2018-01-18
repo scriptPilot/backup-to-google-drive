@@ -16,7 +16,7 @@ foreach ($albums as $album) echo $album['name'] . '<br />';
 
 ## Methods
 
-### setToken(*string* $token)
+### setToken(*string/null* $token)
 
 Set new token for Google Photos API requests.
 
