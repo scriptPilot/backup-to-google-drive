@@ -32,8 +32,8 @@
   $auth->addScope('https://picasaweb.google.com/data/');
   $auth->addScope('https://www.googleapis.com/auth/contacts');
   $auth->addScope('profile');
-  $drive = $auth->getToken() ? new \Google\Drive($auth->getToken()) : null;
-  $photos = $auth->getToken() ? new \Google\Photos($auth->getToken()) : null;
-  $contacts = $auth->getToken() ? new \Google\Contacts($auth->getToken()) : null;
+  $drive = new \Google\Drive($auth->getToken());
+  $photos = new \Google\Photos($auth->getToken());
+  $contacts = new \Google\Contacts($auth->getToken());
 
 ?>
