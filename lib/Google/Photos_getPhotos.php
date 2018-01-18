@@ -36,7 +36,6 @@
       $photos[] = $photo;
     }
   } else {
-    var_dump(curl_error($curl));
     $photos = false;
   }
   curl_close($curl);

@@ -53,7 +53,7 @@
         foreach ($raw['phoneNumbers'] as $tel) {
           $type = $tel['type'] === 'home' ? 'HOME' : ($tel['type'] === 'work' ? 'WORK' : null);
           $number = isset($tel['canonicalForm']) ? $tel['canonicalForm'] : $tel['value'];
-          $contact['phone'][] = ['type' => $type, 'number' => $number];
+          $contact['phone'][] = ['type' => $type, 'value' => $number];
         }
       }
 
@@ -62,7 +62,7 @@
       if (isset($raw['emailAddresses'])) {
         foreach ($raw['emailAddresses'] as $email) {
           $type = $email['type'] === 'home' ? 'HOME' : ($email['type'] === 'work' ? 'WORK' : null);
-          $contact['email'][] = ['type' => $type, 'address' => $email['value']];
+          $contact['email'][] = ['type' => $type, 'value' => $email['value']];
         }
       }
 

@@ -8,6 +8,12 @@
   date_default_timezone_set('Europe/Berlin');
 
   /**
+   * Load vendor modules
+   */
+
+  require('vendor/autoload.php');
+
+  /**
    * Load configuration and classes
    */
 
@@ -22,10 +28,10 @@
    */
 
   $auth = new \Google\Auth(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
-  $auth->addScope('profile');
   $auth->addScope('https://www.googleapis.com/auth/drive');
   $auth->addScope('https://picasaweb.google.com/data/');
   $auth->addScope('https://www.googleapis.com/auth/contacts');
+  $auth->addScope('profile');
   $drive = $auth->getToken() ? new \Google\Drive($auth->getToken()) : null;
   $photos = $auth->getToken() ? new \Google\Photos($auth->getToken()) : null;
   $contacts = $auth->getToken() ? new \Google\Contacts($auth->getToken()) : null;

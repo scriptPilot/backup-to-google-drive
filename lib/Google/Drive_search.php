@@ -26,7 +26,10 @@
   $response = curl_exec($curl);
   if ($response !== false) {
     $files = json_decode($response, true)['files'];
+  } else {
+    $files = false;
   }
+
   curl_close($curl);
 
 ?>

@@ -69,7 +69,6 @@
   if ($response !== false) {
     $file = json_decode($response, true);
   } else {
-    var_dump(curl_error($curl));
     $file = false;
   }
   curl_close($curl);

@@ -15,8 +15,6 @@
     'refresh_token' => $this->getCredentials()['refresh_token']
   ];
 
-  var_dump($credentialsUri);
-
   // Perform cURL request
   $curl = curl_init();
   curl_setopt_array($curl, [
@@ -36,7 +34,6 @@
     // Update token
     $this->setCredentials($credentials);
   } else {
-    echo curl_error($curl);
     $credentials = false;
   }
   curl_close($curl);

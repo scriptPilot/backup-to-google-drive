@@ -29,7 +29,7 @@ https://developers.google.com/drive/v3/reference/files#resource
 
 ### search(*array* $options)
 
-Perform search on folder and files. Returns file list.
+Perform search on folder and files. Returns file list or *false*.
 
 Parameters to be used are listed here:
 https://developers.google.com/drive/v3/reference/files/list

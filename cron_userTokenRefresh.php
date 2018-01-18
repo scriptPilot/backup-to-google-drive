@@ -1,13 +1,13 @@
 <?php
 
   /**
+   * Purpose: Refresh all tokens in .credentials folder
+   */
+
+  /**
    * Common settings, Google object initialization
    */
   require('common.php');
-
-  /**
-   * Purpose: Refresh all tokens in .credentials folder
-   */
 
   // Loop files in folder
   $files = scandir('.credentials');
@@ -29,7 +29,12 @@
                . '?>' . "\n";
       if (!is_dir('.credentials')) mkdir('.credentials');
       file_put_contents($credentialsFile, $content);
+      // Log
+      echo 'Credentials updated for ' . $auth->getUserInfo()['displayName'] . '<br />';
     }
   }
+
+  // Success message
+  echo '<b style="color: green">Cronjob finished successfull</b><br />';
 
 ?>

@@ -24,10 +24,10 @@
     // Show sign-out link
     echo '<p><a href="?action=signOut">Google sign-out</a></p>';
 
-    // Save/delete user credentials
+    // Save(update)/delete user credentials
     echo '<h2>Cronjobs</h2>';
     $credentialsFile = '.credentials/' . $user['id'] . '.php';
-    if ($_GET['action'] === 'saveCredentials') {
+    if ($_GET['action'] === 'saveCredentials' or (file_exists($credentialsFile) && $_GET['action'] !== 'deleteCredentials')) {
       $content = '<?php'. "\n"
                . "\n"
                . '  //credentials:' . json_encode($auth->getCredentials()) . "\n"
@@ -46,13 +46,14 @@
       echo '<p><a href="?action=deleteCredentials">Delete saved credentials</a></p>';
     }
 
-    /*
+    // Synchronization tasks
+    echo '<h2>Synchronization tasks</h2>';
+
     // Show contacts sync link
-    echo '<p><a href="?action=syncContacts">Sync Contacts</a></p>';
+    echo '<p><a href="cron_syncContacts.php">Sync Contacts</a></p>';
 
     // Show album sync link
     echo '<p><a href="?action=syncAlbums">Sync Albums</a></p>';
-    */
 
   }
 
