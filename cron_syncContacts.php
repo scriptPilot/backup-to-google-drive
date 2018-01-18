@@ -44,6 +44,7 @@
 
         // Update credentials and token
         $auth->setCredentials($credentials);
+        $contacts = new \Google\Contacts($auth->getToken());
         $drive = new \Google\Drive($auth->getToken());
 
         /**
