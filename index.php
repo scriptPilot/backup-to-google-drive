@@ -27,7 +27,7 @@
     echo '<p><a href="?action=signOut">Google sign-out</a></p>';
 
     // Save(update)/delete user credentials
-    echo '<h2>Backup jobs</h2>';
+    echo '<h2>Backup script</h2>';
     $credentialsFile = '.credentials/' . $user['id'] . '.php';
     if ($_GET['action'] === 'saveCredentials' or (file_exists($credentialsFile) && $_GET['action'] !== 'deleteCredentials')) {
       $content = '<?php'. "\n"
@@ -42,10 +42,10 @@
     }
     if (!file_exists($credentialsFile)) {
       echo '<p style="color: gray">Not active</p>';
-      echo '<p><a href="?action=saveCredentials">Save credentials</a></p>';
+      echo '<p><a href="?action=saveCredentials">Activate</a></p>';
     } else {
       echo '<p style="color: green"><b>Active</b></p>';
-      echo '<p><a href="?action=deleteCredentials">Delete saved credentials</a></p>';
+      echo '<p><a href="?action=deleteCredentials">Deactivate</a></p>';
     }
 
   }
