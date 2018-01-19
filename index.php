@@ -1,12 +1,12 @@
 <?php
 
   /**
-   * Common settings, Google object initialization
+   * Common settings, object initialization
    */
   require('common.php');
 
   /**
-   * Handle sign-in and sign-out
+   * Handle Google sign-in and sign-out
    */
 
   if ($_GET['action'] === 'signIn') $auth->signIn();
@@ -16,34 +16,40 @@
   else if ($_GET['action'] === 'syncAlbums') require('index_syncAlbums.php');
   else {
 
-    $drive->touch('1hLfpwLKL1kcnVRQiQ68UzJQc0vx4ol4m');
+    /**
+     * Headline
+     */
+
+    echo '<h1>Backup to Google Drive</h1>';
+
+    /**
+     * Google
+     */
+
+    // Headline
+    echo '<h2>Google</h2>';
+
+    // Restore credentials
+    $googleCredentialsFile = './credentials/' . $auth->getUserInfo()['id'] . '.google.php';
+    if (file_exists($googleCredentialsFile)) {
+      $content = file_get_contents($googleCredentialsFile);
+      preg_match('/\/\/(.+)\\n/', $content, $search);
+      $credentials = json_decode(trim($search[1]), true);
+      $auth->setCredentials($credentials);
+    }
 
     // Show user info
     $user = $auth->getUserInfo();
-    echo '<h1>' . $user['displayName'] . '</h1>';
     echo '<p><img src="' . $user['photoUri'] . '?imgmax=80" /></p>';
 
     // Show sign-out link
-    echo '<p><a href="?action=signOut">Google sign-out</a></p>';
-
-    // Connected services
-    echo '<h2>Connected services</h2>';
-
-    // RememberTheMilk
-    if ($_GET['action'] === 'addRTM') {
-      echo '<p>Get ...</p>';
-    } else {
-      echo '<p><a href="">Add Remember The Milk</a></p>';
-    }
+    echo '<p>' . $user['displayName'] . ' - <a href="?action=signOut">sign-out</a></p>';
 
     // Save(update)/delete user credentials
-    echo '<h2>Backup script</h2>';
-    $credentialsFile = '.credentials/' . $user['id'] . '.php';
+    $credentialsFile = '.credentials/' . $user['id'] . '.google.php';
     if ($_GET['action'] === 'saveCredentials' or (file_exists($credentialsFile) && $_GET['action'] !== 'deleteCredentials')) {
       $content = '<?php'. "\n"
-               . "\n"
-               . '  //credentials:' . json_encode($auth->getCredentials()) . "\n"
-               . "\n"
+               . '  //' . json_encode($auth->getCredentials()) . "\n"
                . '?>' . "\n";
       if (!is_dir('.credentials')) mkdir('.credentials');
       file_put_contents($credentialsFile, $content);
@@ -51,11 +57,52 @@
       unlink($credentialsFile);
     }
     if (!file_exists($credentialsFile)) {
-      echo '<p style="color: gray">Not active</p>';
-      echo '<p><a href="?action=saveCredentials">Activate</a></p>';
+      echo '<p style="color: gray">Not active - <a href="?action=saveCredentials">activate</a></p>';
     } else {
-      echo '<p style="color: green"><b>Active</b></p>';
-      echo '<p><a href="?action=deleteCredentials">Deactivate</a></p>';
+      echo '<p style="color: green"><b>Active</b> - <a href="?action=deleteCredentials">deactivate</a></p>';
+    }
+
+    /**
+     * Remember the Milk
+     */
+
+    // Headline
+    echo '<h2>Remember The Milk</h2>';
+
+    // Credentials file
+    $rtmCredentialsFile = '.credentials/' . $auth->getUserInfo()['id'] . '.rtm.php';
+
+    // Sign-out
+    if ($_GET['action'] === 'rtmSignOut') {
+      unlink($rtmCredentialsFile);
+      $rtm->setCredentials(null);
+
+    // Restore credentials
+    } else if ($rtm->getUserInfo() == null && file_exists($rtmCredentialsFile)) {
+      $content = file_get_contents($rtmCredentialsFile);
+      preg_match('/\/\/(.+)\\n/', $content, $search);
+      $credentials = json_decode(trim($search[1]), true);
+      $rtm->setCredentials($credentials);
+    }
+
+    // Display sign-out link
+    if ($rtm->getUserInfo()) {
+
+      echo '<p>' . $rtm->getUserInfo()['fullname'] . ' - <a href="?action=rtmSignOut">sign-out</a></p>';
+
+      // Update credentials on disk
+      $content = '<?php' . "\n"
+               . '  //' . json_encode($rtm->getCredentials()) . "\n"
+               . '?>';
+      file_put_contents($rtmCredentialsFile, $content);
+
+    // Display sign-in form
+    } else {
+      echo '<form method="get">';
+      echo '<p>1. Sign-in to <a href="' . $rtm->getAuthUri() . '" target="_blank">Remember The Milk</a></p>';
+      echo '<p>2. Enter frob <input name="frob" /></p>';
+      echo '<p>3. <input type="submit" />';
+      echo '</form>';
     }
 
   }

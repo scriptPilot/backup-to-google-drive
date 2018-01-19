@@ -36,10 +36,11 @@
   if (is_dir($dir)) {
     $files = scandir($dir);
     foreach ($files as $file) {
-      if ($file !== '.' && $file !== '..') {
+      if (substr($file, -11) === '.google.php') {
+
         // Extract credentials
         $content = file_get_contents($dir . '/' . $file);
-        preg_match('/\/\/credentials:(.+)\\n/', $content, $search);
+        preg_match('/\/\/(.+)\\n/', $content, $search);
         $credentials = json_decode(trim($search[1]), true);
 
         // Update credentials and token

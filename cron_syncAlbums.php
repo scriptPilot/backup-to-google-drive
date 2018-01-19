@@ -8,7 +8,7 @@
    * Common settings, Google object initialization
    */
   require('common.php');
-  $maxRuntime = 15 * 60; // if tokens are updated every five minutes (55 min lifetime minimum), 50*60 seconds is a good value
+  $maxRuntime = 1800; // not more than script runtime or token expiry
 
   /**
    * Lock cronjob
@@ -38,13 +38,14 @@
   if (is_dir($dir)) {
     $files = scandir($dir);
     foreach ($files as $file) {
-      if ($file !== '.' && $file !== '..') {
+      if (substr($file, -11) === '.google.php') {
+
         // Extract credentials
         $content = file_get_contents($dir . '/' . $file);
-        preg_match('/\/\/credentials:(.+)\\n/', $content, $search);
+        preg_match('/\/\/(.+)\\n/', $content, $search);
         $credentials = json_decode(trim($search[1]), true);
 
-        // Update credentials and token
+        // Update token
         $auth->setCredentials($credentials);
         $photos->setToken($auth->getToken());
         $drive->setToken($auth->getToken());
@@ -202,9 +203,9 @@
                 }
               }
 
-              // Finish script five seconds before max runtime exceeded
-              if (time() - $scriptStartTime > $maxRuntime - 5) {
-                echo 'Maximum runtime of ' . $maxRuntime . ' seconds exceeded<br />';
+              // Finish script ten seconds before max runtime exceeded
+              if (time() - $scriptStartTime > $maxRuntime - 10) {
+                echo 'Maximum runtime of ' . $maxRuntime . ' seconds is nearly exceeded<br />';
                 if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull</b><br />';
                 else echo '<b style="color: red">Cronjob finished with ' . $errors . ' error' . ($errors !== 1? 's' : '') . '</b><br />';
                 unlink($lockFile);

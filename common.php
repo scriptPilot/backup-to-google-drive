@@ -22,7 +22,7 @@
   require('lib/Google/Drive.php');
   require('lib/Google/Photos.php');
   require('lib/Google/Contacts.php');
-  require('lib/RTM/API.php');
+  require('lib/RTM/RTM.php');
 
   /**
    * Create class objects
@@ -36,6 +36,6 @@
   $drive = new \Google\Drive($auth->getToken());
   $photos = new \Google\Photos($auth->getToken());
   $contacts = new \Google\Contacts($auth->getToken());
-  $rtm = new \RTM\API();
+  $rtm = new \RTM\RTM('read');
 
 ?>
