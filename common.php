@@ -23,6 +23,7 @@
   require('lib/Google/Photos.php');
   require('lib/Google/Contacts.php');
   require('lib/RTM/RTM.php');
+  require('lib/GitHub/GitHub.php');
 
   /**
    * Create class objects
@@ -37,5 +38,6 @@
   $photos = new \Google\Photos($auth->getToken());
   $contacts = new \Google\Contacts($auth->getToken());
   $rtm = new \RTM\RTM('read');
+  $github = new \GitHub\GitHub();
 
 ?>

@@ -105,6 +105,46 @@
       echo '</form>';
     }
 
+    /**
+     * GitHub
+     */
+
+    // Headline
+    echo '<h2>GitHub</h2>';
+
+    // Credentials file
+    $githubCredentialsFile = '.credentials/' . $auth->getUserInfo()['id'] . '.github.php';
+
+    // Sign-out
+    if ($_GET['action'] === 'githubSignOut') {
+      unlink($githubCredentialsFile);
+      $github->setCredentials(null);
+
+    // Restore credentials
+    } else if (!$github->getUserInfo() && file_exists($githubCredentialsFile)) {
+      $content = file_get_contents($githubCredentialsFile);
+      preg_match('/\/\/(.+)\\n/', $content, $search);
+      $credentials = json_decode(trim($search[1]), true);
+      $github->setCredentials($credentials);
+    }
+
+    // Display sign-out link
+    if ($github->getUserInfo()) {
+
+     echo '<p><img src="' . $github->getUserInfo()['avatar_url'] . '&s=80" /></p>';
+     echo '<p>' . $github->getUserInfo()['login']. ' - <a href="?action=githubSignOut">sign-out</a></p>';
+
+      // Update credentials on disk
+      $content = '<?php' . "\n"
+               . '  //' . json_encode($github->getCredentials()) . "\n"
+               . '?>';
+      file_put_contents($githubCredentialsFile, $content);
+
+    // Display sign-in form
+    } else {
+      echo '<p>Sign-in to <a href="' . $github->getAuthUri() . '">GitHub</a></p>';
+    }
+
   }
 
 ?>

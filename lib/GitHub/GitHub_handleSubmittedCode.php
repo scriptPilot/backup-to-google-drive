@@ -5,21 +5,21 @@
    */
 
   // Code submitted
-  if (isset($_GET['code']) && strpos($_SERVER['HTTP_REFERER'], 'accounts.google.com') !== false) {
+  if (isset($_GET['code']) && strpos($_SERVER['HTTP_REFERER'], 'accounts.google.com') === false) {
+
 
     // Clean code
     $code = trim($_GET['code']);
 
     // Create credentials uri
-    $credentialsUri = 'https://www.googleapis.com/oauth2/v4/token';
+    $credentialsUri = 'https://github.com/login/oauth/access_token';
 
     // Create credentials fields
     $credentialsFields = [
       'code' => $code,
-      'client_id' => $this->clientId,
-      'client_secret' => $this->clientSecret,
-      'redirect_uri' => $this->redirectUri,
-      'grant_type' => 'authorization_code'
+      'client_id' => GITHUB_CLIENT_ID,
+      'client_secret' => GITHUB_CLIENT_SECRET,
+      'redirect_uri' => GITHUB_REDIRECT_URI
     ];
 
     // Perform cURL request
@@ -29,7 +29,8 @@
       CURLOPT_RETURNTRANSFER => true,
       CURLOPT_FAILONERROR => true,
       CURLOPT_CUSTOMREQUEST => 'POST',
-      CURLOPT_POSTFIELDS => http_build_query($credentialsFields)
+      CURLOPT_POSTFIELDS => http_build_query($credentialsFields),
+      CURLOPT_HTTPHEADER => ['Accept: application/json']
     ]);
     $response = curl_exec($curl);
     if ($response !== false) {
@@ -37,8 +38,8 @@
       $credentials = json_decode($response, true);
       // Update token
       $this->setCredentials($credentials);
-      // Reload redirect URI
-      header('Location: ' . $this->redirectUri);
+      // Redirect
+      //header('Location: ' . GITHUB_REDIRECT_URI);
     }
     curl_close($curl);
 
