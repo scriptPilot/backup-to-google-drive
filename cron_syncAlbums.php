@@ -19,17 +19,20 @@
   if (file_exists($lockFile)) {
     $start = intval(file_get_contents($lockFile));
     $duration = $scriptStartTime - $start;
-    if ($duration > $maxRuntime) {
+	if ($duration > $maxRuntime + 5 * 60) {
+      unlink($lockFile);
+      echo '<span style="color: orange">Process unlocked automatically</span><br />';
+    } else if ($duration > $maxRuntime) {
       echo '<span style="color: red">Process locked for ' . $duration . ' seconds now</span><br />';
       echo '<b style="color: red">Cronjob finished with an error</b>';
+	  exit();
     } else {
       echo 'Process locked for ' . $duration . ' seconds now<br />';
       echo '<b style="color: green">Cronjob finished successfull</b>';
+	  exit();
     }
-    exit();
-  } else {
-    file_put_contents($lockFile, $scriptStartTime);
   }
+  file_put_contents($lockFile, $scriptStartTime);
 
   $errors = 0;
 
