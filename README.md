@@ -1,6 +1,6 @@
 # Backup to Google Drive
 
-> Backup to Google Drive from different sources
+> Backup to Google Drive from different sources for one or more users
 
 ## Scope
 
