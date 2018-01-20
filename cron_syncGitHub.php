@@ -7,9 +7,61 @@
   // Common includes and object initializations
   require('common.php');
 
-   /**
-   * Lock cronjob
+  /**
+   * ZIP function
    */
+
+  function zipData($source, $destination) {
+    if (extension_loaded('zip')) {
+      if (file_exists($source)) {
+        $zip = new ZipArchive();
+        if ($zip->open($destination, ZIPARCHIVE::CREATE)) {
+          $source = realpath($source);
+          if (is_dir($source)) {
+            $iterator = new RecursiveDirectoryIterator($source);
+            // skip dot files while iterating
+            $iterator->setFlags(RecursiveDirectoryIterator::SKIP_DOTS);
+            $files = new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::SELF_FIRST);
+            foreach ($files as $file) {
+              $file = realpath($file);
+              if (is_dir($file)) {
+                $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
+              } else if (is_file($file)) {
+                $zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
+              }
+            }
+          } else if (is_file($source)) {
+            $zip->addFromString(basename($source), file_get_contents($source));
+          }
+        }
+        return $zip->close();
+      }
+    }
+    return false;
+  }
+
+  /**
+  * Remove folder function
+  */
+
+  function rrmdir($dir) {
+   if (is_dir($dir)) {
+     $objects = scandir($dir);
+     foreach ($objects as $object) {
+       if ($object != "." && $object != "..") {
+         if (is_dir($dir."/".$object))
+           rrmdir($dir."/".$object);
+         else
+           unlink($dir."/".$object);
+       }
+     }
+     rmdir($dir);
+   }
+ }
+
+  /**
+  * Lock cronjob
+  */
 
   $lockFile = 'cron_syncGitHub.lock.log';
   if (file_exists($lockFile)) {
@@ -199,15 +251,15 @@
                 }
               }
 
-              // Empty temp folder and temp file
-              exec('rm .tmp -r -f');
-              exec('rm .tmp.zip -r -f');
+              // Empty tmp folder and tmp file
+              if (is_dir('.tmp')) rrmdir('.tmp');
+              if (file_exists('.tmp.zip')) unlink('.tmp.zip');
 
               // Clone repository
               exec('git clone https://' . $github->getToken() . ':x-oauth-basic@github.com/' . strtolower($repo['full_name']) . '.git .tmp');
 
               // Create zip file
-              exec('cd .tmp; zip ../.tmp.zip . -r; cd ..');
+              zipData('.tmp', '.tmp.zip');
 
               // Update file
               $updated = $drive->updateFile($repoFile, [], file_get_contents('.tmp.zip'));
@@ -218,9 +270,9 @@
                 $errors += 1;
               }
 
-              // Remove temp folder and temp file
-              exec('rm .tmp/ -r -f');
-              exec('rm .tmp.zip -r -f');
+              // Remove tmp folder and tmp file
+              if (is_dir('.tmp')) rrmdir('.tmp');
+              unlink('.tmp.zip');
 
             }
 
