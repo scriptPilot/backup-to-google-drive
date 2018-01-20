@@ -13,11 +13,6 @@
 
 1. Create Google API Key and OAuth2 Client
 2. Save config.example.php as config.php and update values
-3. Upload files to server
+3. Upload files to server (PHP and Git required)
 4. Open index.php on server to configure users
 5. Setup cronjobs for all cron_....php files
-
-## Notes
-
-- Requires PHP and Git installed on server
-- To force updates, change the ident definition (in more then one place maybe)
