@@ -64,7 +64,7 @@
 
           // Load repositories by name
           $repos = [];
-          $searchRepos = $github->get('user/repos');
+          $searchRepos = $github->get('user/repos?sort=full_name');
           foreach ($searchRepos as $repo) $repos[$repo['name']] = $repo;
           echo '- '. count($repos) . ' repositor' . (count($repos) !== 1 ? 'ies' : 'y') . ' found in GitHub<br />';
 
@@ -110,21 +110,11 @@
             if (isset($folders[$repoName])) {
               $repoFolderId = $folders[$repoName]['id'];
 
-              // Load branches (name, commit(sha,url))
-              $branches = [];
-              $branchesByIdent = [];
-              $searchBranches = $github->get('repos/' . $repo['full_name'] . '/branches');
-              foreach ($searchBranches as $branch) {
-                $branches[$branch['name']] = $branch;
-                $ident = 'branch/' . $branch['name'] . '/sha/' . $branch['commit']['sha'];
-                $branchesByIdent[$ident] = $branch;
-              }
-              echo '- ' . count($branches) . ' branch' . (count($branches) !== 1 ? 'es' : '') . ' found for "' . $repoName . '"<br />';
-
               // Load files
               $files = [];
               $filesByIdent = [];
               $issueFile = null;
+              $repoFile = null;
               $searchFiles = $drive->search(['q' => 'trashed=false and "' . $repoFolderId . '" in parents', 'orderBy' => 'name', 'pageSize' => 1000]);
               foreach ($searchFiles as $file) {
                 $files[$file['name']] = $file;
@@ -139,8 +129,12 @@
                 if ($fileName === 'Issues.json') {
                   $issueFile = $file['id'];
 
-                // Not in $branchesByIdent
-                } else if (!array_key_exists($file['description'], $branchesByIdent)) {
+                // Repo zip file
+                } else if ($fileName === 'Git Repository.zip') {
+                  $repoFile = $file['id'];
+
+                // Additional files
+                } else {
                   $trash = $drive->trash($file['id']);
                   if ($trash) {
                     echo '<span style="color: orange">- Trashed "' . $fileName . '"</span><br />';
@@ -152,6 +146,10 @@
                 }
 
               }
+
+              /**
+               * Update Issues.json
+               */
 
               // Create missing Issues.json file
               if (!$issueFile) {
@@ -185,21 +183,44 @@
 
               }
 
-              /*
-              // Save missing branch zip files
-              foreach ($branchesByIdent as $ident => $branch) {
-                if (!in_array($ident, $filesByIdent)) {
-                  $zipFileContent = file_get_contents('https://api.github.com/repos/' . strtolower($repo['full_name']) . '/zipball/' . $branch['name'] . '?access_token=' . $github->getCredentials()['access_token']);
-                  $created = $drive->createFile(['name' => $branch['name'] . '.zip', 'parents' => [$repoFolderId], 'description' => $ident], $zipFileContent);
-                  if ($created) {
-                    echo '<span style="color: blue">- Created "' . $branch['name'] . '.zip"</span><br />';
-                  } else {
-                    echo '<span style="color: red">- Failed to create "' . $branch['name'] . '.zip"</span><br />';
-                    $errors += 1;
-                  }
+              /**
+               * Update GIT folder
+               */
+
+              // Create missing repo file
+              if (!$repoFile) {
+                $created = $drive->createFile(['name' => 'Git Repository.zip', 'parents' => [$repoFolderId]], '');
+                if ($created) {
+                  $repoFile = $created['id'];
+                  echo '<span style="color: blue">- Created "Git Repository.zip"</span><br />';
+                } else {
+                  echo '<span style="color: red">- Failed to create "Git Repository.zip"</span><br />';
+                  $errors += 1;
                 }
               }
-              */
+
+              // Empty temp folder and temp file
+              exec('rm .tmp -r -f');
+              exec('rm .tmp.zip -r -f');
+
+              // Clone repository
+              exec('git clone https://' . $github->getToken() . ':x-oauth-basic@github.com/' . strtolower($repo['full_name']) . '.git .tmp');
+
+              // Create zip file
+              exec('cd .tmp; zip ../.tmp.zip . -r; cd ..');
+
+              // Update file
+              $updated = $drive->updateFile($repoFile, [], file_get_contents('.tmp.zip'));
+              if ($updated) {
+                echo '<span style="color: blue">- Updated "Git Repository.zip"</span><br />';
+              } else {
+                echo '<span style="color: red">- Failed to update "Git Repository.zip"</span><br />';
+                $errors += 1;
+              }
+
+              // Remove temp folder and temp file
+              exec('rm .tmp/ -r -f');
+              exec('rm .tmp.zip -r -f');
 
             }
 

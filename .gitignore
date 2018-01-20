@@ -11,3 +11,7 @@ config.php
 
 # Exclude credentials folder
 .credentials/
+
+# Exclude temp folder and files
+.tmp/
+.tmp.*

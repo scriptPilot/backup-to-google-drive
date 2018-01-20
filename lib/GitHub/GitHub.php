@@ -29,6 +29,7 @@
     public function __construct() { require(__DIR__ . '/GitHub_construct.php'); }
     public function setCredentials($credentials) { require(__DIR__ . '/GitHub_setCredentials.php'); }
     public function getCredentials() { require(__DIR__ . '/GitHub_getCredentials.php'); return $credentials; }
+    public function getToken() { require(__DIR__ . '/GitHub_getToken.php'); return $token; }
     public function getAuthUri() { require(__DIR__ . '/GitHub_getAuthUri.php'); return $authUri; }
     public function get($path) { require(__DIR__ . '/GitHub_get.php'); return $response; }
     public function getUserInfo() { require(__DIR__ . '/GitHub_getUserInfo.php'); return $userInfo; }
