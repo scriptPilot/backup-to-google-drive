@@ -84,6 +84,7 @@
    */
 
   $errors = 0;
+  $actions = 0;
 
   // Loop files in folder
   $dir = '.credentials';
@@ -138,7 +139,11 @@
               if ($trash) {
                 echo '<span style="color: orange">- Trashed "' . $folder['name'] . '"</span><br />';
                 unset($folders[$folderName]);
-              } else echo '<span style="color: red">- Failed to trash "' . $folder['name'] . '"</span><br />';
+                $actions += 1;
+              } else {
+                echo '<span style="color: red">- Failed to trash "' . $folder['name'] . '"</span><br />';
+                $errors += 1;
+              }
             }
 
           }
@@ -152,6 +157,7 @@
               if ($created) {
                 echo '<span style="color: blue">- Created folder "' . $repoName . '"</span><br />';
                 $folders[$repoName] = $created;
+                $actions += 1;
               } else {
                 echo '<span style="color: red">- Failed to create folder "' . $repoName . '"</span><br />';
                 $errors += 1;
@@ -191,6 +197,7 @@
                   if ($trash) {
                     echo '<span style="color: orange">- Trashed "' . $fileName . '"</span><br />';
                     unset($files[$fileName]);
+                    $actions += 1;
                   } else {
                     echo '<span style="color: red">- Failed to trash "' . $fileName. '"</span><br />';
                     $errors += 1;
@@ -209,6 +216,7 @@
                 if ($created) {
                   $issueFile = $created['id'];
                   echo '<span style="color: blue">- Created "Issues.json"</span><br />';
+                  $actions += 1;
                 } else {
                   echo '<span style="color: red">- Failed to create "Issues.json"</span><br />';
                   $errors += 1;
@@ -228,6 +236,7 @@
                 $updated = $drive->updateFile($issueFile, [], json_encode($issues));
                 if ($updated) {
                   echo '<span style="color: blue">- Updated "Issues.json"</span><br />';
+                  $actions += 1;
                 } else {
                   echo '<span style="color: red">- Failed to update "Issues.json"</span><br />';
                   $errors += 1;
@@ -245,6 +254,7 @@
                 if ($created) {
                   $repoFile = $created['id'];
                   echo '<span style="color: blue">- Created "Git Repository.zip"</span><br />';
+                  $actions += 1;
                 } else {
                   echo '<span style="color: red">- Failed to create "Git Repository.zip"</span><br />';
                   $errors += 1;
@@ -265,6 +275,7 @@
               $updated = $drive->updateFile($repoFile, [], file_get_contents('.tmp.zip'));
               if ($updated) {
                 echo '<span style="color: blue">- Updated "Git Repository.zip"</span><br />';
+                $actions += 1;
               } else {
                 echo '<span style="color: red">- Failed to update "Git Repository.zip"</span><br />';
                 $errors += 1;
@@ -287,7 +298,8 @@
    * Show final log
    */
 
-  if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull</b><br />';
+  if ($errors === 0 && $actions === 0) echo '<b style="color: green">Cronjob finished successfull without any action</b><br />';
+  else if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull with ' . $actions . ' action' . ($actions !== 1? 's' : '') . '</b><br />';
   else echo '<b style="color: red">Cronjob finished with ' . $errors . ' error' . ($errors !== 1? 's' : '') . '</b><br />';
 
   /**

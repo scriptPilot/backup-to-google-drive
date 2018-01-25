@@ -35,6 +35,7 @@
   file_put_contents($lockFile, $scriptStartTime);
 
   $errors = 0;
+  $actions = 0;
 
   // Loop files in folder
   $dir = '.credentials';
@@ -89,7 +90,11 @@
             if ($trash) {
               echo '<span style="color: orange">- Trashed folder "' . $folder['name'] . '"</span><br />';
               unset($folders[$ident]);
-            } else echo '<span style="color: red">- Failed to trash folder "' . $folder['name'] . '"</span><br />';
+              $actions += 1;
+            } else {
+              echo '<span style="color: red">- Failed to trash folder "' . $folder['name'] . '"</span><br />';
+              $errors += 1;
+            }
 
           // Name changed > rename
           } else if ($folder['name'] !== $albums[$ident]['name']) {
@@ -97,7 +102,11 @@
             if ($rename) {
               echo '<span style="color: blue">- Renamed folder "' . $folder['name'] . '" to "' . $albums[$ident]['name'] . '"</span><br />';
               $folders[$ident]['name'] = $albums[$ident]['name'];
-            } else echo '<span style="color: red">- Failed to rename folder "' . $folder['name'] . '"</span><br />';
+              $actions += 1;
+            } else {
+              echo '<span style="color: red">- Failed to rename folder "' . $folder['name'] . '"</span><br />';
+              $errors += 1;
+            }
           }
 
         }
@@ -116,8 +125,10 @@
               echo '<span style="color: blue">- Created folder "' . $album['name'] . '"</span><br />';
               $folders[$ident] = $newFolder;
               $backupFolderUpdated = true;
+              $actions += 1;
             } else {
               echo '<span style="color: red">- Failed to create folder "' . $album['name'] . '"</span><br />';
+              $errors += 1;
             }
           }
 
@@ -162,7 +173,8 @@
               // Finish script five seconds before max runtime exceeded
               if (time() - $scriptStartTime > $maxRuntime - 5) {
                 echo 'Maximum runtime of ' . $maxRuntime . ' seconds exceeded<br />';
-                if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull</b><br />';
+                if ($errors === 0 && $actions === 0) echo '<b style="color: green">Cronjob finished successfull without any action</b><br />';
+                else if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull with ' . $actions . ' action' . ($actions !== 1? 's' : '') . '</b><br />';
                 else echo '<b style="color: red">Cronjob finished with ' . $errors . ' error' . ($errors !== 1? 's' : '') . '</b><br />';
                 unlink($lockFile);
                 exit();
@@ -175,7 +187,11 @@
                 if ($trash) {
                   echo '<span style="color: orange">- Trashed file "' . $file['name'] . '"</span><br />';
                   $backupFolder = true;
-                } else echo '<span style="color: red">- Failed to trash file "' . $file['name'] . '"</span><br />';
+                  $actions += 1;
+                } else {
+                  echo '<span style="color: red">- Failed to trash file "' . $file['name'] . '"</span><br />';
+                  $errors += 1;
+                }
 
               // Name changed > rename
               } else if ($file['name'] !== $allPhotos[$fileIdent]['fileName']) {
@@ -183,7 +199,11 @@
                 if ($rename) {
                   echo '<span style="color: blue">- Renamed file "' . $file['name'] . '" to "' . $allPhotos[$fileIdent]['fileName'] . '"</span><br />';
                   $backupFolder = true;
-                } else echo '<span style="color: red">- Failed to rename file "' . $file['name'] . '"</span><br />';
+                  $actions += 1;
+                } else {
+                  echo '<span style="color: red">- Failed to rename file "' . $file['name'] . '"</span><br />';
+                  $errors += 1;
+                }
               }
 
             }
@@ -201,15 +221,18 @@
                 if ($newPhoto) {
                   echo '<span style="color: blue">- Created file "' . $photo['fileName'] . '"</span><br />';
                   $backupFolder = true;
+                  $actions += 1;
                 } else {
                   echo '<span style="color: red">- Failed to create file "' . $photo['fileName'] . '"</span><br />';
+                  $errors += 1;
                 }
               }
 
               // Finish script ten seconds before max runtime exceeded
               if (time() - $scriptStartTime > $maxRuntime - 10) {
                 echo 'Maximum runtime of ' . $maxRuntime . ' seconds is nearly exceeded<br />';
-                if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull</b><br />';
+                if ($errors === 0 && $actions === 0) echo '<b style="color: green">Cronjob finished successfull without any action</b><br />';
+                else if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull with ' . $actions . ' action' . ($actions !== 1? 's' : '') . '</b><br />';
                 else echo '<b style="color: red">Cronjob finished with ' . $errors . ' error' . ($errors !== 1? 's' : '') . '</b><br />';
                 unlink($lockFile);
                 exit();
@@ -225,7 +248,8 @@
     }
   }
 
-  if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull</b><br />';
+  if ($errors === 0 && $actions === 0) echo '<b style="color: green">Cronjob finished successfull without any action</b><br />';
+  else if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull with ' . $actions . ' action' . ($actions !== 1? 's' : '') . '</b><br />';
   else echo '<b style="color: red">Cronjob finished with ' . $errors . ' error' . ($errors !== 1? 's' : '') . '</b><br />';
 
   // Unlock cronjob

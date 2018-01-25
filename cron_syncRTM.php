@@ -32,6 +32,7 @@
    */
 
   $errors = 0;
+  $actions = 0;
 
   // Loop files in folder
   $dir = '.credentials';
@@ -76,6 +77,7 @@
             $created = $drive->createFile(['name' => $fileName, 'parents' => [$folderId]], '');
             if ($created) {
               $fileId = $created['id'];
+              $actions += 1;
             } else {
               echo '<span style="color: red">- Failed to create "'. $fileName . '"</span><br />';
               $errors += 1;
@@ -105,6 +107,7 @@
           $updated = $drive->updateFile($fileId, [], $jsonString);
           if ($updated) {
             echo '<span style="color: blue">- Updated file "'. $fileName. '"</span><br />';
+            $actions += 1;
           } else {
             echo '<span style="color: red">- Failed to update "'. $fileName . '"</span><br />';
             $errors += 1;
@@ -119,7 +122,8 @@
    * Show final log
    */
 
-  if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull</b><br />';
+  if ($errors === 0 && $actions === 0) echo '<b style="color: green">Cronjob finished successfull without any action</b><br />';
+  else if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull with ' . $actions . ' action' . ($actions !== 1? 's' : '') . '</b><br />';
   else echo '<b style="color: red">Cronjob finished with ' . $errors . ' error' . ($errors !== 1? 's' : '') . '</b><br />';
 
   /**

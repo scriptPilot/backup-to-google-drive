@@ -30,6 +30,7 @@
   }
 
   $errors = 0;
+  $actions = 0;
 
   // Loop files in folder
   $dir = '.credentials';
@@ -81,6 +82,7 @@
             $trashed = $drive->trash($file['id']);
             if ($trashed) {
               echo '<span style="color: orange">- Trashed file "'. $file['name'] . '"</span><br />';
+              $actions += 1;
             } else {
               echo '<span style="color: red">- Failed to trash "'. $file['name'] . '"</span><br />';
               $errors += 1;
@@ -95,6 +97,7 @@
             $created = $drive->createFile(['name' => $contact['displayName'] . '.vcf', 'description' => $ident, 'parents' => [$folderId]], $content);
             if ($created) {
               echo '<span style="color: blue">- Created file "'. $created['name'] . '"</span><br />';
+              $actions += 1;
             } else {
               echo '<span style="color: red">- Failed to create "'. $created['name'] . '"</span><br />';
               $errors += 1;
@@ -106,7 +109,8 @@
     }
   }
 
-  if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull</b><br />';
+  if ($errors === 0 && $actions === 0) echo '<b style="color: green">Cronjob finished successfull without any action</b><br />';
+  else if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull with ' . $actions . ' action' . ($actions !== 1? 's' : '') . '</b><br />';
   else echo '<b style="color: red">Cronjob finished with ' . $errors . ' error' . ($errors !== 1? 's' : '') . '</b><br />';
 
   // Unlock cronjob

@@ -8,12 +8,6 @@
   date_default_timezone_set('Europe/Berlin');
 
   /**
-   * Load vendor modules
-   */
-
-  require('vendor/autoload.php');
-
-  /**
    * Load configuration and classes
    */
 
