@@ -89,18 +89,19 @@
           $listsCount = count($lists);
           echo '- Found ' . $listsCount . ' list' . ($listsCount !== 1 ? 's' : '') . ' in RTM<br />';
 
-          // Get taskseries
-          $tasksPerList = $rtm->getRequestResponse(['method' => 'rtm.tasks.getList'])['tasks']['list'];
+          // Get taskseries per list
+          $json = [];
           $tasksCount = 0;
-          foreach ($tasksPerList as $list) {
-            $tasksCount += count($list['taskseries']);
+          foreach ($lists as $list) {
+            if ($list['smart'] === '1') $taskseries = null;
+            else $taskseries = $rtm->getRequestResponse(['method' => 'rtm.tasks.getList', 'list_id' => $list['id']])['tasks']['list'][0]['taskseries'];
+            $list['taskseries'] = $taskseries;
+            $json[] = $list;
+            if ($taskseries !== null) $tasksCount += count($taskseries);
           }
           echo '- Found ' . $tasksCount . ' tasks serie' . ($tasksCount !== 1 ? 's' : '') . ' in RTM<br />';
 
           // Create json object
-          $json = [];
-          foreach ($lists as $list) $json[$list['id']] = $list;
-          foreach ($tasksPerList as $list) $json[$list['id']]['taskseries'] = $list['taskseries'];
           $jsonString = json_encode($json);
 
           // Update file
