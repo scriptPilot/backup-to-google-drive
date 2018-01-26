@@ -1,6 +1,5 @@
 # Exclude composer files
 vendor/
-composer.json
 composer.lock
 
 # Exclude config files

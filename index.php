@@ -5,6 +5,9 @@
    */
   require('common.php');
 
+  $a = $photos->getPhotos('6368759564351089313');
+  echo '<pre>'; print_r($a); print_r(); echo '</pre>';
+
   /**
    * Handle Google sign-in and sign-out
    */

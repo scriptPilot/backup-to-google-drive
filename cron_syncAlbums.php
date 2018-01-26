@@ -1,7 +1,7 @@
 <?php
 
   /**
-   * Purpose: Sync all contacts to Google drive for saved credentials
+   * Purpose: Sync all Google Photo albums to Google drive for saved credentials
    */
 
   /**
@@ -9,6 +9,9 @@
    */
   require('common.php');
   $maxRuntime = 1800; // not more than script runtime or token expiry
+
+  $errors = 0;
+  $actions = 0;
 
   /**
    * Lock cronjob
@@ -22,20 +25,18 @@
 	if ($duration > $maxRuntime + 5 * 60) {
       unlink($lockFile);
       echo '<span style="color: orange">Process unlocked automatically</span><br />';
+      $actions += 1;
     } else if ($duration > $maxRuntime) {
       echo '<span style="color: red">Process locked for ' . $duration . ' seconds now</span><br />';
       echo '<b style="color: red">Cronjob finished with an error</b>';
 	  exit();
     } else {
       echo 'Process locked for ' . $duration . ' seconds now<br />';
-      echo '<b style="color: green">Cronjob finished successfull</b>';
+      echo '<b style="color: green">Cronjob finished successfull without any action</b>';
 	  exit();
     }
   }
   file_put_contents($lockFile, $scriptStartTime);
-
-  $errors = 0;
-  $actions = 0;
 
   // Loop files in folder
   $dir = '.credentials';
@@ -149,7 +150,7 @@
                 if (substr($currentPhoto['mimeType'], 0, 6) === 'image/') {
                   $ext = str_replace('jpeg', 'jpg', substr($currentPhoto['mimeType'], 6));
                   $currentPhoto['fileName'] = $album['name'] . ' #' . str_pad($photoNo, strlen(count($getPhotos)), '0', STR_PAD_LEFT) . '.' . $ext;
-                  $photoIdent = 'album/' . $album['id'] . '/photo/' . $currentPhoto['id'] . '/updated/' . $currentPhoto['updated'];
+                  $photoIdent = 'album/' . $album['id'] . '/photo/' . $currentPhoto['id'] . '/version/' . $currentPhoto['version'];
                   $allPhotos[$photoIdent] = $currentPhoto;
                 } else {
                   echo '<span style="color: orange">- Skipped file ' . $currentPhoto['name'] . '</span><br />';

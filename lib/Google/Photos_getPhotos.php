@@ -11,7 +11,7 @@
 
   // Create REST URI
   $restUri = 'https://picasaweb.google.com/data/feed/api/user/default/albumid/' . $albumId
-           . '?alt=json&fields=entry(gphoto:id,title,content,updated)'
+           . '?alt=json&fields=entry(gphoto:id,gphoto:version,title,content,updated)'
            . '&access_token=' . $this->token;
 
   // Perform cURL request
@@ -27,14 +27,19 @@
     $photosRaw = json_decode($response, true)['feed']['entry'];
     if (is_array($photosRaw)) {
       foreach ($photosRaw as $photoRaw) {
-        $photo = [
-          'id' => $photoRaw['gphoto$id']['$t'],
-          'name' => $photoRaw['title']['$t'],
-          'mimeType' => $photoRaw['content']['type'],
-          'uri' => $photoRaw['content']['src'],
-          'updated' => $photoRaw['updated']['$t']
-        ];
-        $photos[] = $photo;
+        $name = $photoRaw['title']['$t'];
+        $ext = pathinfo(strtolower($name))['extension'];
+        if ($ext === 'jpg' or $ext === 'png' or $ext === 'gif' or $ext === 'bmp') {
+          $photo = [
+            'id' => $photoRaw['gphoto$id']['$t'],
+            'version' => $photoRaw['gphoto$version']['$t'],
+            'name' => $name,
+            'mimeType' => $photoRaw['content']['type'],
+            'uri' => $photoRaw['content']['src'],
+            'updated' => $photoRaw['updated']['$t']
+          ];
+          $photos[] = $photo;
+        }
       }
     }
   } else {
