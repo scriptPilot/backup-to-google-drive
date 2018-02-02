@@ -150,7 +150,7 @@
                 if (substr($currentPhoto['mimeType'], 0, 6) === 'image/') {
                   $ext = str_replace('jpeg', 'jpg', substr($currentPhoto['mimeType'], 6));
                   $currentPhoto['fileName'] = $album['name'] . ' #' . str_pad($photoNo, strlen(count($getPhotos)), '0', STR_PAD_LEFT) . '.' . $ext;
-                  $photoIdent = 'album/' . $album['id'] . '/photo/' . $currentPhoto['id'] . '/version/' . $currentPhoto['version'];
+                  $photoIdent = 'album/' . $album['id'] . '/photo/' . $currentPhoto['id'] . '/updated/' . $currentPhoto['updated'];
                   $allPhotos[$photoIdent] = $currentPhoto;
                 } else {
                   echo '<span style="color: orange">- Skipped file ' . $currentPhoto['name'] . '</span><br />';

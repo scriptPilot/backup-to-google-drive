@@ -6,6 +6,7 @@
 
   // Common includes and object initializations
   require('common.php');
+  $maxRuntime = 1800; // not more than script runtime or token expiry
 
   /**
    * ZIP function
@@ -64,20 +65,25 @@
   */
 
   $lockFile = 'cron_syncGitHub.lock.log';
+  $scriptStartTime = time();
   if (file_exists($lockFile)) {
     $start = intval(file_get_contents($lockFile));
-    $duration = time() - $start;
-    if ($duration > 1800) {
+    $duration = $scriptStartTime - $start;
+	if ($duration > $maxRuntime + 5 * 60) {
+      unlink($lockFile);
+      echo '<span style="color: orange">Process unlocked automatically</span><br />';
+      $actions += 1;
+    } else if ($duration > $maxRuntime) {
       echo '<span style="color: red">Process locked for ' . $duration . ' seconds now</span><br />';
       echo '<b style="color: red">Cronjob finished with an error</b>';
+	  exit();
     } else {
       echo 'Process locked for ' . $duration . ' seconds now<br />';
-      echo '<b style="color: green">Cronjob finished successfull</b>';
+      echo '<b style="color: green">Cronjob finished successfull without any action</b>';
+	  exit();
     }
-    exit();
-  } else {
-    file_put_contents($lockFile, time());
   }
+  file_put_contents($lockFile, $scriptStartTime);
 
   /**
    * Synchronize
@@ -150,6 +156,16 @@
 
           // Loop repositories
           foreach ($repos as $repoName => $repo) {
+
+            // Finish script five seconds before max runtime exceeded
+            if (time() - $scriptStartTime > $maxRuntime - 5) {
+              echo 'Maximum runtime of ' . $maxRuntime . ' seconds exceeded<br />';
+              if ($errors === 0 && $actions === 0) echo '<b style="color: green">Cronjob finished successfull without any action</b><br />';
+              else if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull with ' . $actions . ' action' . ($actions !== 1? 's' : '') . '</b><br />';
+              else echo '<b style="color: red">Cronjob finished with ' . $errors . ' error' . ($errors !== 1? 's' : '') . '</b><br />';
+              unlink($lockFile);
+              exit();
+            }
 
             // Create missing repo backup folder
             if (!isset($folders[$repoName])) {

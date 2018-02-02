@@ -11,6 +11,7 @@
    * Load configuration and classes
    */
 
+  require('vendor/autoload.php');
   require('config.php');
   require('lib/Google/Auth.php');
   require('lib/Google/Drive.php');
