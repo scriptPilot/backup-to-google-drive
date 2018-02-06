@@ -75,7 +75,7 @@
 
         // Load unqiue sub folders, add ident
         $folders = [];
-        $foldersSearch = $drive->search(['q' => 'trashed=false and "' . $folderId . '" in parents', 'orderBy' => 'name', 'pageSize' => 1000]);
+        $foldersSearch = $drive->search(['q' => 'trashed=false and "' . $folderId . '" in parents', 'orderBy' => 'name']);
         foreach ($foldersSearch as $folder) {
           $ident = (!$folder['description'] || $folder['description'] === '' || array_key_exists($folder['description'], $folders)) ? $folder['id'] : $folder['description'];
           $folders[$ident] = $folder;
@@ -161,7 +161,7 @@
 
             // Load all files, add identifier > log
             $allFiles = [];
-            $filesSearch = $drive->search(['q' => 'trashed=false and "' . $folder['id'] . '" in parents', 'orderBy' => 'name', 'pageSize' => 1000]);
+            $filesSearch = $drive->search(['q' => 'trashed=false and "' . $folder['id'] . '" in parents', 'orderBy' => 'name']);
             foreach ($filesSearch as $currentFile) {
               $ident = (!$currentFile['description'] || $currentFile['description'] === '' || array_key_exists($currentFile['description'], $allFiles)) ? $currentFile['id'] : $currentFile['description'];
               $allFiles[$ident] = $currentFile;

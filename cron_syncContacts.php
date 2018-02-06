@@ -75,7 +75,7 @@
 
         // Load files
         $allFiles = [];
-        $fileSearch = $drive->search(['q' => '"' . $folderId . '" in parents and trashed=false', 'orderBy' => 'name', 'pageSize' => 1000]);
+        $fileSearch = $drive->search(['q' => '"' . $folderId . '" in parents and trashed=false', 'orderBy' => 'name']);
         foreach ($fileSearch as $file) {
           $ident = $file['description'] ? $file['description'] : $file['id'];
           $allFiles[$ident] = $file;

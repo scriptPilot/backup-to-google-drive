@@ -189,7 +189,7 @@
               $filesByIdent = [];
               $issueFile = null;
               $repoFile = null;
-              $searchFiles = $drive->search(['q' => 'trashed=false and "' . $repoFolderId . '" in parents', 'orderBy' => 'name', 'pageSize' => 1000]);
+              $searchFiles = $drive->search(['q' => 'trashed=false and "' . $repoFolderId . '" in parents', 'orderBy' => 'name']);
               foreach ($searchFiles as $file) {
                 $files[$file['name']] = $file;
                 $filesByIdent[$file['description']] = $file;
