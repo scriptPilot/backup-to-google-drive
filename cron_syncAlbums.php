@@ -62,6 +62,11 @@
         // Show user name
         echo 'Albums synchronization starts for <b>'. $auth->getUserInfo()['displayName'] . '</b><br />';
 
+        // Load file with deletion markings
+        $deletionMarkingsFile = 'cron_syncAlbums_deletionMarkings.txt';
+        $deletionMarkings = file_exists($deletionMarkingsFile) ? unserialize(file_get_contents($deletionMarkingsFile)) : [];
+        $newDeletionMarkings = [];
+
         // Load albums, add ident
         $albums = [];
         foreach ($photos->getAlbums() as $album) {
@@ -73,7 +78,7 @@
         // Get backup folder
         $folderId = $drive->ensureFolder(DEFAULT_BACKUP_FOLDER_ALBUMS)['id'];
 
-        // Load unqiue sub folders, add ident
+        // Load unique sub folders, add ident
         $folders = [];
         $foldersSearch = $drive->search(['q' => 'trashed=false and "' . $folderId . '" in parents', 'orderBy' => 'name']);
         foreach ($foldersSearch as $folder) {
@@ -87,14 +92,19 @@
 
           // No match or no folder > trash
           if (!isset($albums[$ident]) || $folder['mimeType'] !== 'application/vnd.google-apps.folder') {
-            $trash = $drive->trash($folder['id']);
-            if ($trash) {
-              echo '<span style="color: orange">- Trashed folder "' . $folder['name'] . '"</span><br />';
-              unset($folders[$ident]);
-              $actions += 1;
+            if (in_array($folder['id'], $deletionMarkings)) {
+              $trash = $drive->trash($folder['id']);
+              if ($trash) {
+                echo '<span style="color: orange">- Trashed folder "' . $folder['name'] . '"</span><br />';
+                unset($folders[$ident]);
+                $actions += 1;
+              } else {
+                echo '<span style="color: red">- Failed to trash folder "' . $folder['name'] . '"</span><br />';
+                $errors += 1;
+              }
             } else {
-              echo '<span style="color: red">- Failed to trash folder "' . $folder['name'] . '"</span><br />';
-              $errors += 1;
+              echo '<span>- Marked folder "' . $folder['name'] . '" for deletion</span><br />';
+              $newDeletionMarkings[] = $folder['id'];
             }
 
           // Name changed > rename
@@ -150,7 +160,9 @@
                 if (substr($currentPhoto['mimeType'], 0, 6) === 'image/') {
                   $ext = str_replace('jpeg', 'jpg', substr($currentPhoto['mimeType'], 6));
                   $currentPhoto['fileName'] = $album['name'] . ' #' . str_pad($photoNo, strlen(count($getPhotos)), '0', STR_PAD_LEFT) . '.' . $ext;
-                  $photoIdent = 'album/' . $album['id'] . '/photo/' . $currentPhoto['id'] . '/updated/' . $currentPhoto['updated'];
+                  $currentPhoto['hash'] = sha1_file($currentPhoto['uri'] . '?imgmax=80');
+                  //$photoIdent = 'album/' . $album['id'] . '/photo/' . $currentPhoto['id'] . '/updated/' . $currentPhoto['updated'];
+                  $photoIdent = 'album/' . $album['id'] . '/photo/' . $currentPhoto['id'] . '/hash/' . $currentPhoto['hash'];
                   $allPhotos[$photoIdent] = $currentPhoto;
                 } else {
                   echo '<span style="color: orange">- Skipped file ' . $currentPhoto['name'] . '</span><br />';
@@ -171,8 +183,8 @@
             // Loop files
             foreach ($allFiles as $fileIdent => $file) {
 
-              // Finish script five seconds before max runtime exceeded
-              if (time() - $scriptStartTime > $maxRuntime - 5) {
+              // Finish script ten seconds before max runtime exceeded
+              if (time() - $scriptStartTime > $maxRuntime - 10) {
                 echo 'Maximum runtime of ' . $maxRuntime . ' seconds exceeded<br />';
                 if ($errors === 0 && $actions === 0) echo '<b style="color: green">Cronjob finished successfull without any action</b><br />';
                 else if ($errors === 0) echo '<b style="color: green">Cronjob finished successfull with ' . $actions . ' action' . ($actions !== 1? 's' : '') . '</b><br />';
@@ -184,14 +196,19 @@
               // No match > trash
               if (!isset($allPhotos[$fileIdent])) {
 
-                $trash = $drive->trash($file['id']);
-                if ($trash) {
-                  echo '<span style="color: orange">- Trashed file "' . $file['name'] . '"</span><br />';
-                  $backupFolder = true;
-                  $actions += 1;
+                if (in_array($file['id'], $deletionMarkings)) {
+                  $trash = $drive->trash($file['id']);
+                  if ($trash) {
+                    echo '<span style="color: orange">- Trashed file "' . $file['name'] . '"</span><br />';
+                    $backupFolder = true;
+                    $actions += 1;
+                  } else {
+                    echo '<span style="color: red">- Failed to trash file "' . $file['name'] . '"</span><br />';
+                    $errors += 1;
+                  }
                 } else {
-                  echo '<span style="color: red">- Failed to trash file "' . $file['name'] . '"</span><br />';
-                  $errors += 1;
+                  echo '<span>- Marked file "' . $file['name'] . '" for deletion</span><br />';
+                  $newDeletionMarkings[] = $file['id'];
                 }
 
               // Name changed > rename
@@ -243,6 +260,13 @@
 
           }
 
+        }
+
+        // Update deletion markings file
+        if (count($newDeletionMarkings) > 0) {
+          file_put_contents($deletionMarkingsFile, serialize($newDeletionMarkings));
+        } else if (file_exists($deletionMarkingsFile)) {
+          unlink($deletionMarkingsFile);
         }
 
       }
