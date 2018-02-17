@@ -7,7 +7,7 @@
   class albumsSync {
 
     private $startTime;
-    private $maxRuntime = 900;
+    private $maxRuntime = 300;
     private $logs = [];
     private $errors = 0;
     private $actions = 0;
