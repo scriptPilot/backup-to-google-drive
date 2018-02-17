@@ -10,8 +10,10 @@
   if (!is_string($albumId)) throw new Exception('Argument $albumId must be a string');
 
   // Create REST URI
+  // - gphoto:checksum is empty
+  // - gphoto:position does reflect the same (maybe incorrect) order as the default one
   $restUri = 'https://picasaweb.google.com/data/feed/api/user/default/albumid/' . $albumId
-           . '?alt=json&fields=entry(gphoto:id,title,content,updated)'
+           . '?alt=json&xfields=entry(gphoto:id,title,content,updated)'
            . '&access_token=' . $this->token;
 
   // Perform cURL request
@@ -25,7 +27,6 @@
   if ($response !== false) {
     $photos = [];
     $photosRaw = json_decode($response, true)['feed']['entry'];
-
     if (is_array($photosRaw)) {
       foreach ($photosRaw as $photoRaw) {
         $name = $photoRaw['title']['$t'];

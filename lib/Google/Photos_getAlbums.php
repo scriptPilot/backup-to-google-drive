@@ -24,7 +24,8 @@
     foreach ($albumsRaw as $albumRaw) {
       $album = [
         'id' => $albumRaw['gphoto$id']['$t'],
-        'name' => $albumRaw['title']['$t']
+        'name' => $albumRaw['title']['$t'],
+        'updated' => $albumRaw['updated']['$t']
       ];
       if (preg_match('/^(Auto Backup|Profile Photos|Hangout:(.+)|([0-9]{4}-[0-9]{2}-[0-9]{2}))$/', $album['name']) === 0) {
         $albums[] = $album;
