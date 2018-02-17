@@ -27,8 +27,7 @@
       $this->startTime = time();
       $this->lockScript();
       $this->log('Started synchronization script');
-
-      require('vendor/autoload.php');
+      
       require('config.php');
       require('lib/Google/Auth.php');
       require('lib/Google/Drive.php');
