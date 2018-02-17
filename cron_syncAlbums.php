@@ -117,6 +117,9 @@
 
         // Sync albums
         $this->syncAlbums();
+        
+        // Write cache
+        $this->writeCache();
 
       }
       $this->stop();
