@@ -370,11 +370,11 @@
       echo implode('<br />', $this->logs);
       if (count($this->logs) > 0) echo '<br />';
       if ($this->errors > 0) {
-        echo '<span style="color: red">Script finished with ' . $this->errors . ' error' . ($this->errors !== 1 ? 's' : '') . '</span>';
+        echo '<span style="color: red">Cronjob finished with ' . $this->errors . ' error' . ($this->errors !== 1 ? 's' : '') . '</span>';
       } else if ($this->actions > 0) {
-        echo '<span style="color: green">Script finished with ' . $this->actions . ' action' . ($this->actions !== 1 ? 's' : '') . '.</span>';
+        echo '<span style="color: green">Cronjob finished successfull with ' . $this->actions . ' action' . ($this->actions !== 1 ? 's' : '') . '.</span>';
       } else {
-        echo '<span style="color: green">Script finished without any action.</span>';
+        echo '<span style="color: green">Cronjob finished successfull without any action.</span>';
       }
       echo '</body></html>';
     }
