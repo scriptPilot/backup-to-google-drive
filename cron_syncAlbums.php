@@ -263,7 +263,12 @@
 
       $this->checkRuntime();
 
-      $this->syncPhotos($albumIdent, $allPhotos, $allFiles);
+      // Workaround to avoid deletion of all photos
+      // Run only if there are more than zero photos
+      // To empty/trash album, trash it in Google Photos!
+      if (count($allPhotos) > 0) {
+        $this->syncPhotos($albumIdent, $allPhotos, $allFiles);
+      }
 
     }
 
