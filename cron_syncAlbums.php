@@ -103,6 +103,8 @@
 
         // Update credentials
         $this->gAuth->setCredentials($credential);
+        $this->gDrive->setToken($this->gAuth->getToken());
+        $this->gPhotos->setToken($this->gAuth->getToken());
         $userInfo = $this->gAuth->getUserInfo();
         $this->userId = $userInfo['id'];
 
