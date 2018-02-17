@@ -18,6 +18,7 @@
     private $userId;
     private $albums;
     private $photos;
+    private $skipNotUpdatedAlbums = false; // The updated date is not reliable for photo edits inside but improves performance
 
     public function start() {
 
@@ -184,16 +185,16 @@
 
       // Loop albums
       foreach ($this->albums as $ident => $album) {
-
-        $this->syncAlbum($ident, $album);
-
-        /* the updated date is not reliable for photos inside :-(
-        if ($album['updated'] === $album['lastSync']) {
-          $this->log('Album "' . $album['name'] . '" is up-to-date');
+        
+        if ($this->skipNotUpdatedAlbums === true) {
+          if ($album['updated'] === $album['lastSync']) {
+            $this->log('Album "' . $album['name'] . '" is up-to-date');
+          } else {
+            $this->syncAlbum($ident, $album);
+          }
         } else {
           $this->syncAlbum($ident, $album);
         }
-        */
 
       }
     }
@@ -317,10 +318,8 @@
 
       }
 
-      /* removed as the indicator is not reliable for photo updates inside the album
-      $this->log('Synchronization completed for album "' . $this->albums[$albumIdent]['name'] . '"');
-      $this->albums[$albumIdent]['lastSync'] = $this->albums[$albumIdent]['updated']; */
-
+      $this->albums[$albumIdent]['lastSync'] = $this->albums[$albumIdent]['updated'];
+      
     }
 
     private function checkRuntime() {
