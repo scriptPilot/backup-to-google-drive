@@ -7,7 +7,7 @@
   class cleanup {
 
     private $startTime;
-    private $maxRuntime = 280;
+    private $maxRuntime = 280; // should be 20 seconds less than the cronjob interval
     private $logs = [];
     private $errors = 0;
     private $actions = 0;
