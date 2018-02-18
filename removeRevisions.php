@@ -7,7 +7,7 @@
   class cleanup {
 
     private $startTime;
-    private $maxRuntime = 300;
+    private $maxRuntime = 280;
     private $logs = [];
     private $errors = 0;
     private $actions = 0;
