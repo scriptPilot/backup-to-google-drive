@@ -28,7 +28,7 @@
       $this->startTime = time();
       $this->lockScript();
       $this->log('Started synchronization script');
-      
+
       require('config.php');
       require('lib/Google/Auth.php');
       require('lib/Google/Drive.php');
@@ -120,7 +120,7 @@
 
         // Sync albums
         $this->syncAlbums();
-        
+
         // Write cache
         $this->writeCache();
 
@@ -129,63 +129,67 @@
     }
 
     private function syncAlbums() {
-      // Load albums, add ident and lastSync from cache
-      $albums = [];
-      foreach ($this->gPhotos->getAlbums() as $album) {
-        $ident = 'album/' . $album['id'];
-        $albums[$ident] = $album;
-        if (isset($this->albums[$ident]['lastSync'])) $albums[$ident]['lastSync'] = $this->albums[$ident]['lastSync'];
-      }
-      $this->albums = $albums;
-      $this->log(count($albums) . ' album' . (count($albums) !== 1 ? 's' : '') . ' found in Google Photos');
 
-      $this->checkRuntime();
+      // Workaround to avoid mass deletion
+      try {
 
-      // Load unique sub folders, add ident
-      $folders = [];
-      $foldersSearch = $this->gDrive->search(['q' => 'trashed=false and "' . $this->folderId . '" in parents', 'orderBy' => 'name']);
-      foreach ($foldersSearch as $folder) {
-        $ident = (!$folder['description'] || $folder['description'] === '' || array_key_exists($folder['description'], $folders)) ? $folder['id'] : $folder['description'];
-        $folders[$ident] = $folder;
-      }
-      $this->log(count($folders) . ' folder' . (count($folders) !== 1 ? 's' : '') . ' found in Google Drive');
-
-      // Loop folders
-      foreach ($folders as $ident => $folder) {
+        // Load albums, add ident and lastSync from cache
+        $albums = [];
+        foreach ($this->gPhotos->getAlbums() as $album) {
+          $ident = 'album/' . $album['id'];
+          $albums[$ident] = $album;
+          if (isset($this->albums[$ident]['lastSync'])) $albums[$ident]['lastSync'] = $this->albums[$ident]['lastSync'];
+        }
+        $this->albums = $albums;
+        $this->log(count($albums) . ' album' . (count($albums) !== 1 ? 's' : '') . ' found in Google Photos');
 
         $this->checkRuntime();
 
-        // Album found for folder
-        if (isset($this->albums[$ident])) {
+        // Load unique sub folders, add ident
+        $folders = [];
+        $foldersSearch = $this->gDrive->search(['q' => 'trashed=false and "' . $this->folderId . '" in parents', 'orderBy' => 'name']);
+        foreach ($foldersSearch as $folder) {
+          $ident = (!$folder['description'] || $folder['description'] === '' || array_key_exists($folder['description'], $folders)) ? $folder['id'] : $folder['description'];
+          $folders[$ident] = $folder;
+        }
+        $this->log(count($folders) . ' folder' . (count($folders) !== 1 ? 's' : '') . ' found in Google Drive');
 
-          // Update folder ID
-          $this->albums[$ident]['folderId'] = $folder['id'];
+        // Loop folders
+        foreach ($folders as $ident => $folder) {
 
-          // Folder name is different to album name
-          if ($folder['name'] !== $this->albums[$ident]['name']) {
+          $this->checkRuntime();
 
-            // Rename
-            $rename = $this->gDrive->rename($folder['id'], $this->albums[$ident]['name']);
-            if ($rename) $this->log('Renamed folder "' . $folder['name'] . '" to "' . $this->albums[$ident]['name'] . '"');
-              else $this->log('Failed to rename folder "' . $folder['name'] . '"');
+          // Album found for folder
+          if (isset($this->albums[$ident])) {
+
+            // Update folder ID
+            $this->albums[$ident]['folderId'] = $folder['id'];
+
+            // Folder name is different to album name
+            if ($folder['name'] !== $this->albums[$ident]['name']) {
+
+              // Rename
+              $rename = $this->gDrive->rename($folder['id'], $this->albums[$ident]['name']);
+              if ($rename) $this->log('Renamed folder "' . $folder['name'] . '" to "' . $this->albums[$ident]['name'] . '"');
+                else $this->log('Failed to rename folder "' . $folder['name'] . '"');
+
+            }
+
+          // No album found for folder
+          } else {
+
+            // Trash folder
+            $trash = $this->gDrive->trash($folder['id']);
+            if ($trash) $this->log('Trashed folder "' . $folder['name'] . '"');
+              else $this->log('Failed to trash folder "' . $folder['name'] . '"');
 
           }
 
-        // No album found for folder
-        } else {
-
-          // Trash folder
-          $trash = $this->gDrive->trash($folder['id']);
-          if ($trash) $this->log('Trashed folder "' . $folder['name'] . '"');
-            else $this->log('Failed to trash folder "' . $folder['name'] . '"');
-
         }
 
-      }
+        // Loop albums
+        foreach ($this->albums as $ident => $album) {
 
-      // Loop albums
-      foreach ($this->albums as $ident => $album) {
-        
         if ($this->skipNotUpdatedAlbums === true) {
           if ($album['updated'] === $album['lastSync']) {
             $this->log('Album "' . $album['name'] . '" is up-to-date');
@@ -197,6 +201,11 @@
         }
 
       }
+
+      } catch (Exception $e) {
+        $this->log('Skipped to avoid mass deletion or recreation');
+      }
+
     }
 
     private function syncAlbum($albumIdent, $album) {
@@ -235,7 +244,10 @@
             $ext = str_replace('jpeg', 'jpg', substr($currentPhoto['mimeType'], 6));
             $currentPhoto['fileName'] = $album['name'] . ' #' . str_pad($photoNo, strlen(count($getPhotos)), '0', STR_PAD_LEFT) . '.' . $ext;
             $photoIdent = 'album/' . $album['id'] . '/photo/' . $currentPhoto['id'];
-            if ($this->photos[$album['id']][$photoIdent]['updated'] === $currentPhoto['updated'] && isset($this->photos[$album['id']][$photoIdent]['hash'])) {
+            if ($this->photos[$album['id']][$photoIdent]['updated'] === $currentPhoto['updated']
+                && isset($this->photos[$album['id']][$photoIdent]['hash'])
+                && $this->photos[$album['id']][$photoIdent]['hash'] !== ''
+                && $this->photos[$album['id']][$photoIdent]['hash'] !== false) {
               $currentPhoto['hash'] = $this->photos[$album['id']][$photoIdent]['hash'];
             } else {
               $currentPhoto['hash'] = sha1_file($currentPhoto['uri'] . '?imgmax=80');
@@ -251,24 +263,36 @@
       $this->log(count($allPhotos) . ' photo' . (count($allPhotos) !== 1 ? 's' : '') . ' found in album "' . $album['name'] . '"');
       $this->photos[$album['id']] = $allPhotos;
 
-      // Load all files, add identifier > log
-      $allFiles = [];
-      $filesSearch = $this->gDrive->search(['q' => 'trashed=false and "' . $album['folderId'] . '" in parents', 'orderBy' => 'name']);
-      foreach ($filesSearch as $currentFile) {
-        $ident = (!$currentFile['description'] || $currentFile['description'] === '' || array_key_exists($currentFile['description'], $allFiles)) ? $currentFile['id'] : $currentFile['description'];
-        if (strpos($ident, '/hash/') > -1) $currentFile['hash'] = substr($ident, strpos($ident, '/hash/') + 6);
-        $ident = strpos($ident, '/hash/') > -1 ? substr($ident, 0, strpos($ident, '/hash/')) : $ident;
-        $allFiles[$ident] = $currentFile;
-      }
-      $this->log(count($allFiles) . ' file' . (count($allFiles) !== 1 ? 's' : '') . ' found in folder "' . $album['name'] . '"');
-
-      $this->checkRuntime();
-
       // Workaround to avoid deletion of all photos
       // Run only if there are more than zero photos
       // To empty/trash album, trash it in Google Photos!
       if (count($allPhotos) > 0) {
-        $this->syncPhotos($albumIdent, $allPhotos, $allFiles);
+
+        // Load all files, add identifier > log
+        $allFiles = [];
+        $filesSearch = $this->gDrive->search(['q' => 'trashed=false and "' . $album['folderId'] . '" in parents', 'orderBy' => 'name']);
+
+        // Workaround to avoid creation of double files and deletion again
+        if (is_array($filesSearch)) {
+
+          foreach ($filesSearch as $currentFile) {
+            $ident = (!$currentFile['description'] || $currentFile['description'] === '' || array_key_exists($currentFile['description'], $allFiles)) ? $currentFile['id'] : $currentFile['description'];
+            if (strpos($ident, '/hash/') > -1) $currentFile['hash'] = substr($ident, strpos($ident, '/hash/') + 6);
+            $ident = strpos($ident, '/hash/') > -1 ? substr($ident, 0, strpos($ident, '/hash/')) : $ident;
+            $allFiles[$ident] = $currentFile;
+          }
+          $this->log(count($allFiles) . ' file' . (count($allFiles) !== 1 ? 's' : '') . ' found in folder "' . $album['name'] . '"');
+
+          $this->checkRuntime();
+
+          $this->syncPhotos($albumIdent, $allPhotos, $allFiles);
+
+        } else {
+          $this->log('Skipped folder to avoid mass recreation');
+        }
+
+      } else {
+        $this->log('Skipped album to avoid mass deletion');
       }
 
     }
@@ -319,7 +343,7 @@
       }
 
       $this->albums[$albumIdent]['lastSync'] = $this->albums[$albumIdent]['updated'];
-      
+
     }
 
     private function checkRuntime() {
